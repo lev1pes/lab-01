@@ -1,0 +1,30 @@
+[project]
+name = "findex"
+version = "0.1.0"
+description = "Лабораторна 1: ліниве читання корпусу, токенізація та статистика"
+readme = "README.md"
+authors = [
+    { name = "lev1pes", email = "96699273+lev1pes@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.12.14,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.7",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
