@@ -1,7 +1,7 @@
 [project]
 name = "findex"
 version = "0.1.0"
-description = "Лабораторна 1: ліниве читання корпусу, токенізація та статистика"
+description = "findex: текстовий корпус, інвертований індекс та булевий пошук"
 readme = "README.md"
 authors = [
     { name = "lev1pes", email = "96699273+lev1pes@users.noreply.github.com" }
