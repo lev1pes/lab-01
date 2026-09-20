@@ -18,7 +18,7 @@ from pathlib import Path
 from findex.corpus import iter_documents
 from findex.index import STORAGES, build_index
 from findex.models import Index, pairs
-from findex.search import search
+from findex.search import boolean_search as search
 from findex.store import load, save
 
 

@@ -1,13 +1,20 @@
-"""Булевий пошук: послідовне обчислення AND, OR та NOT."""
+"""Ранжований пошук із новим парсером і сумісний булевий режим лаби 2."""
 
 import argparse
+import heapq
+import logging
 import time
 import tracemalloc
 from collections.abc import Sequence
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from findex.models import Index, document_ids
-from findex.store import load
+from findex.query import parse
+from findex.scoring import BM25, Scorer, TfIdf
+from findex.snippets import snippet
+from findex.store import open_index
+from findex.timing import timed
 from findex.tokenize import tokenize
 
 
@@ -92,7 +99,7 @@ def parse_query(query: str) -> list[tuple[str, bool, str]]:
     return parts
 
 
-def search(index: Index, query: str, engine: str = "merge") -> list[int]:
+def boolean_search(index: Index, query: str, engine: str = "merge") -> list[int]:
     if engine not in ("merge", "set"):
         raise ValueError(f"Невідомий рушій: {engine}")
     result = None
@@ -123,29 +130,107 @@ def search(index: Index, query: str, engine: str = "merge") -> list[int]:
     return sorted(result) if engine == "set" else result
 
 
+@dataclass(frozen=True, order=True, slots=True)
+class SearchResult:
+    doc_id: int = field(compare=False)
+    score: float
+    title: str = field(compare=False)
+    snippet: str = field(default="", compare=False)
+    _tie: int = field(init=False, repr=False)
+
+    def __post_init__(self):
+        object.__setattr__(self, "_tie", -self.doc_id)
+
+    def __str__(self):
+        return f"{self.score:.5f}\t{self.doc_id}\t{self.title}\n  {self.snippet}"
+
+
+@timed
+def search(
+    index: Index, query: str, scorer: Scorer | None = None, k: int = 10
+) -> list[SearchResult]:
+    """Ранжувати булеву відповідь; NOT фільтрує, але не додає позитивних балів."""
+    if type(k) is not int or k < 0:
+        raise ValueError("k має бути невід'ємним цілим числом")
+    scorer = BM25() if scorer is None else scorer
+    candidates = index.matched_ids(query)
+    terms = parse(query).terms()
+    scores = dict.fromkeys(candidates, 0.0)
+    for term in sorted(terms):
+        for posting in index.get(term, ()):
+            if posting.doc_id in candidates:
+                scores[posting.doc_id] += scorer.score(term, posting, index)
+    top = heapq.nlargest(
+        k,
+        (
+            SearchResult(doc, score, index.doc_meta[doc].title)
+            for doc, score in scores.items()
+        ),
+    )
+    return [
+        replace(result, snippet=snippet(index.texts.get(result.doc_id, ""), terms))
+        for result in top
+    ]
+
+
 def main(argv: Sequence[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Булевий пошук у збереженому індексі")
+    parser = argparse.ArgumentParser(
+        description="Ранжований пошук у збереженому індексі"
+    )
     parser.add_argument("index", type=Path, help="довірений файл індексу")
     parser.add_argument("query", help="терміни та оператори AND, OR, NOT")
-    parser.add_argument("--engine", choices=("merge", "set"), default="merge")
+    parser.add_argument(
+        "--engine",
+        choices=("merge", "set"),
+        default=None,
+        help="старий булевий режим лабораторної 2",
+    )
     parser.add_argument("--format", choices=("pickle", "json"), default=None)
+    parser.add_argument("--scorer", choices=("bm25", "tfidf"), default="bm25")
+    parser.add_argument("--top", type=int, default=10, help="кількість результатів")
+    parser.add_argument("--boolean", action="store_true", help="режим лабораторної 2")
+    parser.add_argument(
+        "--repeat", type=int, default=1, help="повторити запит в одному індексі"
+    )
+    parser.add_argument("--verbose", action="store_true", help="журнал часу та кешу")
     args = parser.parse_args(argv)
+    args.boolean = args.boolean or args.engine is not None
+    args.engine = args.engine or "merge"
+    if args.top < 0 or args.repeat < 1:
+        parser.error("--top має бути >= 0, --repeat має бути >= 1")
+    logging.basicConfig(
+        level=logging.INFO if args.verbose else logging.WARNING, format="%(message)s"
+    )
     tracemalloc.start()
     started = time.perf_counter()
     try:
-        index = load(args.index, args.format)
-        loaded = time.perf_counter()
-        ids = search(index, args.query, args.engine)
-        finished = time.perf_counter()
-        _, peak = tracemalloc.get_traced_memory()
+        with open_index(args.index, args.format) as index:
+            loaded = time.perf_counter()
+            scorer = BM25() if args.scorer == "bm25" else TfIdf()
+            for _ in range(args.repeat):
+                results = (
+                    boolean_search(index, args.query, args.engine)
+                    if args.boolean
+                    else search(index, args.query, scorer, args.top)
+                )
+            finished = time.perf_counter()
+            _, peak = tracemalloc.get_traced_memory()
+            lines = []
+            for result in results:
+                doc = result if args.boolean else result.doc_id
+                meta = index.doc_meta[doc]
+                lines.append(
+                    f"{doc}\t{meta.title}\t{meta.path}"
+                    if args.boolean
+                    else f"{result}\n  {meta.path}"
+                )
     except (OSError, ValueError) as error:
         parser.error(str(error))
     finally:
         tracemalloc.stop()
-    print(f"Знайдено документів: {len(ids)}")
-    for doc_id in ids:
-        meta = index.doc_meta[doc_id]
-        print(f"{doc_id}\t{meta.title}\t{meta.path}")
+    print(f"Знайдено документів: {len(results)}")
+    for line in lines:
+        print(line)
     print(f"Завантаження: {loaded - started:.6f} с")
     print(f"Пошук: {finished - loaded:.6f} с")
     print(f"Загальний час: {finished - started:.6f} с")

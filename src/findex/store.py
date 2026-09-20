@@ -3,11 +3,13 @@
 import json
 import pickle
 from array import array
+from contextlib import contextmanager
 from pathlib import Path
 
 from findex.models import ArrayPostings, DocMeta, Index, PlainPosting, Posting, pairs
+from findex.timing import timed
 
-VERSION = 1
+VERSION = 2
 
 
 def file_format(path: Path, format: str | None) -> str:
@@ -50,6 +52,28 @@ def validate(index: Index) -> None:
             previous = doc_id
     if totals != index.doc_lengths:
         raise ValueError("Частоти не збігаються з довжинами документів")
+    if any(
+        doc not in ids or not isinstance(text, str) for doc, text in index.texts.items()
+    ):
+        raise ValueError("Некоректні тексти для снипетів")
+    if index.has_positions:
+        if set(index._positions) != set(index):
+            raise ValueError("Позиції не відповідають словнику")
+        for term, postings in index.items():
+            if set(index._positions[term]) != {p.doc_id for p in postings}:
+                raise ValueError("Позиції не відповідають документам терміна")
+            for posting in postings:
+                positions = index.positions(term, posting.doc_id)
+                if (
+                    len(positions) != posting.tf
+                    or any(
+                        type(p) is not int
+                        or not 0 <= p < index.doc_length(posting.doc_id)
+                        for p in positions
+                    )
+                    or any(a >= b for a, b in zip(positions, positions[1:]))
+                ):
+                    raise ValueError("Некоректні позиції токенів")
 
 
 def save(index: Index, path: Path, format: str | None = None) -> None:
@@ -68,6 +92,8 @@ def save(index: Index, path: Path, format: str | None = None) -> None:
             "postings": {
                 term: list(pairs(items)) for term, items in index.postings.items()
             },
+            "texts": dict(index.texts),
+            "positions": index._positions,
         }
         with path.open("w", encoding="utf-8") as target:
             json.dump(data, target, ensure_ascii=False, separators=(",", ":"))
@@ -97,9 +123,17 @@ def from_json(data: dict) -> Index:
             )
         else:
             postings[term] = [record(doc, tf) for doc, tf in items]
-    return Index(postings, lengths, metadata, storage)
+    positions = data.get("positions")
+    if positions is not None:
+        positions = {
+            term: {int(doc): tuple(values) for doc, values in docs.items()}
+            for term, docs in positions.items()
+        }
+    texts = {int(doc): text for doc, text in data.get("texts", {}).items()}
+    return Index(postings, lengths, metadata, storage, positions, texts)
 
 
+@timed
 def load(path: Path, format: str | None = None) -> Index:
     """Pickle дозволено читати лише з довіреного власного файла."""
     selected = file_format(path, format)
@@ -112,7 +146,7 @@ def load(path: Path, format: str | None = None) -> Index:
         else:
             with path.open(encoding="utf-8") as source:
                 data = json.load(source)
-        if not isinstance(data, dict) or data.get("version") != VERSION:
+        if not isinstance(data, dict) or data.get("version") not in (1, VERSION):
             raise ValueError("Непідтримувана версія індексу")
         index = data["index"] if selected == "pickle" else from_json(data)
         validate(index)
@@ -127,3 +161,13 @@ def load(path: Path, format: str | None = None) -> Index:
         ImportError,
     ) as error:
         raise ValueError("Пошкоджений або несумісний файл індексу") from error
+
+
+@contextmanager
+def open_index(path: Path, format: str | None = None):
+    """Файли закриває load; finally звільняє пам'ять і кеш навіть при винятку."""
+    index = load(path, format)
+    try:
+        yield index
+    finally:
+        index.close()

@@ -1,0 +1,49 @@
+build_index: 26871.792 мс
+build_index: 24173.084 мс
+load: 3587.520 мс
+cache miss: hits=0 misses=1 query='dataclasses OR the'
+search: 7915.760 мс
+cache miss: hits=0 misses=2 query='"event loop"'
+search: 104.103 мс
+cache hit: hits=1 misses=2 query='"event loop"'
+search: 65.277 мс
+cache miss: hits=1 misses=3 query='dataclass OR dataclasses'
+search: 267.219 мс
+cache hit: hits=2 misses=3 query='dataclass OR dataclasses'
+search: 234.579 мс
+cache miss: hits=2 misses=4 query='pickle OR serialization'
+search: 310.845 мс
+cache hit: hits=3 misses=4 query='pickle OR serialization'
+search: 81.219 мс
+cache miss: hits=3 misses=5 query='generator OR yield'
+search: 285.388 мс
+cache hit: hits=4 misses=5 query='generator OR yield'
+search: 253.149 мс
+cache miss: hits=4 misses=6 query='pathlib OR paths'
+search: 447.734 мс
+cache hit: hits=5 misses=6 query='pathlib OR paths'
+search: 112.343 мс
+cache miss: hits=5 misses=7 query='"regular expression" OR regex'
+search: 261.798 мс
+cache hit: hits=6 misses=7 query='"regular expression" OR regex'
+search: 142.792 мс
+cache miss: hits=6 misses=8 query='dictionary OR hashing'
+search: 476.120 мс
+cache hit: hits=7 misses=8 query='dictionary OR hashing'
+search: 142.603 мс
+cache miss: hits=7 misses=9 query='"context manager"'
+search: 426.872 мс
+cache hit: hits=8 misses=9 query='"context manager"'
+search: 298.811 мс
+cache miss: hits=8 misses=10 query='decorator OR decorators'
+search: 471.177 мс
+cache hit: hits=9 misses=10 query='decorator OR decorators'
+search: 355.634 мс
+cache miss: hits=9 misses=11 query='heapq OR heap'
+search: 652.334 мс
+cache hit: hits=10 misses=11 query='heapq OR heap'
+search: 138.491 мс
+cache miss: hits=10 misses=12 query='python AND (async OR await) NOT java "event loop"'
+search: 98.226 мс
+cache hit: hits=11 misses=12 query='python AND (async OR await) NOT java "event loop"'
+search: 120.874 мс

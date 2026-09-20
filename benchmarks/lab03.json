@@ -1,0 +1,844 @@
+{
+  "measured_at": "2026-09-20T20:16:56.266038+00:00",
+  "python": "3.12.5 (tags/v3.12.5:ff3bc82, Aug  6 2024, 20:45:27) [MSC v.1940 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "corpus": "data/python-docs",
+  "builds": [
+    {
+      "positions": false,
+      "seconds": 26.872139400045853,
+      "peak_bytes": 36620779,
+      "file_bytes": 15855407,
+      "documents": 503,
+      "tokens": 1557525,
+      "terms": 28916,
+      "postings": 280939
+    },
+    {
+      "positions": true,
+      "seconds": 24.173401899985038,
+      "peak_bytes": 117295654,
+      "file_bytes": 22029586,
+      "documents": 503,
+      "tokens": 1557525,
+      "terms": 28916,
+      "postings": 280939
+    }
+  ],
+  "judgments_sha256": "98119433399cd95b0d9d6c7d39e812e7534a6fe746c6b4d9dcccde66c269cc2b",
+  "sanity": {
+    "rarity": {
+      "query": "dataclasses OR the",
+      "rare_df": 18,
+      "common_df": 496,
+      "rare_path": "library/dataclasses.txt",
+      "rare_score": 7.45933185165151,
+      "common_only_path": "library/tkinter.ttk.txt",
+      "common_only_score": 0.03730311609195161
+    },
+    "saturation": {
+      "term": "python",
+      "path": "faq/general.txt",
+      "actual_tf": 142,
+      "length": 2972,
+      "scores_at_controlled_tf": {
+        "1": 0.22649687954706227,
+        "2": 0.3218727954596419,
+        "19": 0.5164558524683749,
+        "20": 0.5182989663564906
+      },
+      "marginal_gain_ratio": 0.01932473067734552
+    },
+    "length": {
+      "term": "generator",
+      "tf": 1,
+      "short_path": "about.txt",
+      "short_length": 209,
+      "short_score": 3.3891352525280887,
+      "long_path": "library/os.txt",
+      "long_length": 27914,
+      "long_score": 0.42698349743092484
+    }
+  },
+  "evaluation": [
+    {
+      "query": "\"event loop\"",
+      "intent": "Подієвий цикл asyncio, керування ним та запуск задач",
+      "tfidf": {
+        "precision_at_5": 0.6,
+        "top_5": [
+          {
+            "path": "library/asyncio-eventloop.txt",
+            "score": 20.37061731425559,
+            "snippet": "…ome an error.  .. function:: set_[event]_[loop]([loop])     Set *[loop]* as the current [event] [loop] for the current OS thread.  .. function:: new_[event]_[loop]()     Create…",
+            "relevant": true
+          },
+          {
+            "path": "library/asyncio-policy.txt",
+            "score": 16.482430959260903,
+            "snippet": "…od:: set_[event]_[loop]([loop])        Set the [event] [loop] for the current context to *[loop]*.     .. method:: new_[event]_[loop]()        Create and return a new [event] loo…",
+            "relevant": true
+          },
+          {
+            "path": "library/asyncio-llapi-index.txt",
+            "score": 16.223735672433573,
+            "snippet": "…- Run the [event] [loop] forever.      * - :meth:`[loop].stop`       - Stop the [event] [loop].      * - :meth:`[loop].close`       - Close the [event] [loop].      * - :meth:`…",
+            "relevant": false
+          },
+          {
+            "path": "library/asyncio-task.txt",
+            "score": 16.06477587333228,
+            "snippet": "…s function returns a *callable* intended to be used as a task factory of an     [event] [loop] via :meth:`[loop].set_task_factory(factory) <[loop].set_task_factory>`). …",
+            "relevant": true
+          },
+          {
+            "path": "library/asyncio-protocol.txt",
+            "score": 15.792664478032684,
+            "snippet": "…or used by    [event] [loop] methods like :meth:`[loop].create_connection`,    :meth:`[loop].create_unix_connection`,    :meth:`[loop].create_server`, :meth:`[loop].sendfil…",
+            "relevant": false
+          }
+        ]
+      },
+      "bm25": {
+        "precision_at_5": 0.6,
+        "top_5": [
+          {
+            "path": "library/asyncio-policy.txt",
+            "score": 7.272381533610824,
+            "snippet": "…od:: set_[event]_[loop]([loop])        Set the [event] [loop] for the current context to *[loop]*.     .. method:: new_[event]_[loop]()        Create and return a new [event] loo…",
+            "relevant": true
+          },
+          {
+            "path": "library/asyncio-eventloop.txt",
+            "score": 7.209789016115677,
+            "snippet": "…ome an error.  .. function:: set_[event]_[loop]([loop])     Set *[loop]* as the current [event] [loop] for the current OS thread.  .. function:: new_[event]_[loop]()     Create…",
+            "relevant": true
+          },
+          {
+            "path": "library/asyncio-runner.txt",
+            "score": 7.195048903582801,
+            "snippet": "…set the created [loop] as the    current one. By default :func:`asyncio.new_[event]_[loop]` is used and set as    current [event] [loop] with :func:`asyncio.set_[event]_loo…",
+            "relevant": true
+          },
+          {
+            "path": "library/asyncio-llapi-index.txt",
+            "score": 7.187792836469738,
+            "snippet": "…- Run the [event] [loop] forever.      * - :meth:`[loop].stop`       - Stop the [event] [loop].      * - :meth:`[loop].close`       - Close the [event] [loop].      * - :meth:`…",
+            "relevant": false
+          },
+          {
+            "path": "library/asyncio-platforms.txt",
+            "score": 7.020889299723283,
+            "snippet": "…     On Windows, :class:`ProactorEventLoop` is now the default [event] [loop].  All [event] loops on Windows do not support the following methods:  * :meth:`[loop].crea…",
+            "relevant": false
+          }
+        ]
+      }
+    },
+    {
+      "query": "dataclass OR dataclasses",
+      "intent": "Генерація класів даних, типізація та застосування з іншими класами",
+      "tfidf": {
+        "precision_at_5": 0.6,
+        "top_5": [
+          {
+            "path": "library/dataclasses.txt",
+            "score": 33.08293860202483,
+            "snippet": "… above markup!  .. _[dataclasses]-inheritance:  Inheritance -----------  When the [dataclass] is being created by the :func:`@[dataclass] <[dataclass]>` decorator, it l…",
+            "relevant": true
+          },
+          {
+            "path": "library/typing.txt",
+            "score": 25.52438323889629,
+            "snippet": "…specifiers=(), **kwargs)     Decorator to mark an object as providing    :func:`[dataclass] <[dataclasses].[dataclass]>`-like behavior.     ``[dataclass]_transform`` ma…",
+            "relevant": true
+          },
+          {
+            "path": "whatsnew/3.10.txt",
+            "score": 21.873530171447904,
+            "snippet": "…You can say that every field is keyword-only:  .. code-block:: python      from [dataclasses] import [dataclass]      @[dataclass](kw_only=True)     class Birthday:  …",
+            "relevant": false
+          },
+          {
+            "path": "howto/enum.txt",
+            "score": 18.601361505903114,
+            "snippet": "…umerations. (See `OrderedEnum`_ for an example.)   .. _enum-[dataclass]-support:  [Dataclass] support -----------------  When inheriting from a :class:`~[dataclasses]…",
+            "relevant": true
+          },
+          {
+            "path": "whatsnew/3.11.txt",
+            "score": 16.4800479287904,
+            "snippet": "…rated object performs runtime \"magic\" that transforms a class, giving it :func:`[dataclass] <[dataclasses].[dataclass]>`-like behaviors.  For example::      # The cre…",
+            "relevant": false
+          }
+        ]
+      },
+      "bm25": {
+        "precision_at_5": 0.6,
+        "top_5": [
+          {
+            "path": "library/dataclasses.txt",
+            "score": 16.084050904271628,
+            "snippet": "… above markup!  .. _[dataclasses]-inheritance:  Inheritance -----------  When the [dataclass] is being created by the :func:`@[dataclass] <[dataclass]>` decorator, it l…",
+            "relevant": true
+          },
+          {
+            "path": "library/typing.txt",
+            "score": 11.787966575180908,
+            "snippet": "…specifiers=(), **kwargs)     Decorator to mark an object as providing    :func:`[dataclass] <[dataclasses].[dataclass]>`-like behavior.     ``[dataclass]_transform`` ma…",
+            "relevant": true
+          },
+          {
+            "path": "howto/enum.txt",
+            "score": 11.301837852528749,
+            "snippet": "…umerations. (See `OrderedEnum`_ for an example.)   .. _enum-[dataclass]-support:  [Dataclass] support -----------------  When inheriting from a :class:`~[dataclasses]…",
+            "relevant": true
+          },
+          {
+            "path": "whatsnew/3.10.txt",
+            "score": 10.68769125734243,
+            "snippet": "…You can say that every field is keyword-only:  .. code-block:: python      from [dataclasses] import [dataclass]      @[dataclass](kw_only=True)     class Birthday:  …",
+            "relevant": false
+          },
+          {
+            "path": "library/queue.txt",
+            "score": 10.365201347318074,
+            "snippet": "…hat ignores the data item and only compares the priority number::          from [dataclasses] import [dataclass], field         from typing import Any          @dat…",
+            "relevant": false
+          }
+        ]
+      }
+    },
+    {
+      "query": "pickle OR serialization",
+      "intent": "Серіалізація Python-об'єктів та пов'язані механізми",
+      "tfidf": {
+        "precision_at_5": 0.4,
+        "top_5": [
+          {
+            "path": "library/pickle.txt",
+            "score": 27.603700077913587,
+            "snippet": ":mod:`![pickle]` --- Python object [serialization] ==============================================  .. module:: [pickle]…",
+            "relevant": true
+          },
+          {
+            "path": "library/zoneinfo.txt",
+            "score": 14.21450305352321,
+            "snippet": "…sions, but it is guaranteed not to be a valid ``ZoneInfo`` key.  .. _pickling:  [Pickle] [serialization] ********************  Rather than serializing all transitio…",
+            "relevant": false
+          },
+          {
+            "path": "library/multiprocessing.txt",
+            "score": 13.216062497354784,
+            "snippet": "… and it must be a byte string.     *serializer* must be ``'[pickle]'`` (use :mod:`[pickle]` [serialization]) or    ``'xmlrpclib'`` (use :mod:`xmlrpc.client` serializa…",
+            "relevant": false
+          },
+          {
+            "path": "howto/logging-cookbook.txt",
+            "score": 12.827562833189054,
+            "snippet": "…ive boxing wizards jump quickly.  Note that there are some security issues with [pickle] in some scenarios. If these affect you, you can use an alternative serial…",
+            "relevant": false
+          },
+          {
+            "path": "library/shelve.txt",
+            "score": 12.765862984119165,
+            "snippet": "…:mod:`dbm`       Generic interface to ``dbm``-style databases.     Module :mod:`[pickle]`       Object [serialization] used by :mod:`shelve`.  ",
+            "relevant": true
+          }
+        ]
+      },
+      "bm25": {
+        "precision_at_5": 0.4,
+        "top_5": [
+          {
+            "path": "library/pickle.txt",
+            "score": 12.984343290284059,
+            "snippet": ":mod:`![pickle]` --- Python object [serialization] ==============================================  .. module:: [pickle]…",
+            "relevant": true
+          },
+          {
+            "path": "library/zoneinfo.txt",
+            "score": 11.029108069988949,
+            "snippet": "…sions, but it is guaranteed not to be a valid ``ZoneInfo`` key.  .. _pickling:  [Pickle] [serialization] ********************  Rather than serializing all transitio…",
+            "relevant": false
+          },
+          {
+            "path": "library/shelve.txt",
+            "score": 10.28377572353768,
+            "snippet": "…:mod:`dbm`       Generic interface to ``dbm``-style databases.     Module :mod:`[pickle]`       Object [serialization] used by :mod:`shelve`.  ",
+            "relevant": true
+          },
+          {
+            "path": "library/marshal.txt",
+            "score": 10.238140337736876,
+            "snippet": ":mod:`!marshal` --- Internal Python object [serialization] ========================================================  .. modul…",
+            "relevant": false
+          },
+          {
+            "path": "tutorial/inputoutput.txt",
+            "score": 9.115381816891947,
+            "snippet": "…     :mod:`[pickle]` - the [pickle] module     Contrary to :ref:`JSON <tut-json>`, *[pickle]* is a protocol which allows    the [serialization] of arbitrarily complex P…",
+            "relevant": false
+          }
+        ]
+      }
+    },
+    {
+      "query": "generator OR yield",
+      "intent": "Семантика та використання генераторів",
+      "tfidf": {
+        "precision_at_5": 0.6,
+        "top_5": [
+          {
+            "path": "reference/expressions.txt",
+            "score": 23.965322064300516,
+            "snippet": "…n` \")\"    [yield]_from: \"[yield]\" \"from\" `expression`    [yield]_expression: \"[yield]\" `[yield]_list` | `[yield]_from`  The [yield] expression is used when defining a :term:`…",
+            "relevant": true
+          },
+          {
+            "path": "howto/functional.txt",
+            "score": 18.995380945092787,
+            "snippet": "…on:      >>> def generate_ints(N):     ...    for i in range(N):     ...        [yield] i  Any function containing a :keyword:`[yield]` keyword is a [generator] funct…",
+            "relevant": true
+          },
+          {
+            "path": "reference/simple_stmts.txt",
+            "score": 16.903994642721784,
+            "snippet": "… to the [yield] expression statements ::    ([yield] <expr>)   ([yield] from <expr>)  [Yield] expressions and statements are only used when defining a :term:`[generator]`…",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/2.5.txt",
+            "score": 16.835710528097437,
+            "snippet": "…ets you write a single [generator] function instead of defining a new class.  The [generator] should [yield] exactly one value.  The code up to the :keyword:`[yield]` w…",
+            "relevant": false
+          },
+          {
+            "path": "library/inspect.txt",
+            "score": 16.758829379089583,
+            "snippet": "…or objects created by    :keyword:`async def` functions which use the :keyword:`[yield]` statement,    but will accept any asynchronous [generator]-like object that…",
+            "relevant": true
+          }
+        ]
+      },
+      "bm25": {
+        "precision_at_5": 0.6,
+        "top_5": [
+          {
+            "path": "reference/expressions.txt",
+            "score": 9.650342981680273,
+            "snippet": "…n` \")\"    [yield]_from: \"[yield]\" \"from\" `expression`    [yield]_expression: \"[yield]\" `[yield]_list` | `[yield]_from`  The [yield] expression is used when defining a :term:`…",
+            "relevant": true
+          },
+          {
+            "path": "howto/functional.txt",
+            "score": 9.149486669925796,
+            "snippet": "…on:      >>> def generate_ints(N):     ...    for i in range(N):     ...        [yield] i  Any function containing a :keyword:`[yield]` keyword is a [generator] funct…",
+            "relevant": true
+          },
+          {
+            "path": "reference/simple_stmts.txt",
+            "score": 8.90220870994083,
+            "snippet": "… to the [yield] expression statements ::    ([yield] <expr>)   ([yield] from <expr>)  [Yield] expressions and statements are only used when defining a :term:`[generator]`…",
+            "relevant": false
+          },
+          {
+            "path": "library/contextlib.txt",
+            "score": 8.612771378104338,
+            "snippet": "…block raises an exception     The function being decorated must return a :term:`[generator]`-iterator when    called. This iterator must [yield] exactly one value, …",
+            "relevant": false
+          },
+          {
+            "path": "library/inspect.txt",
+            "score": 8.407058142512128,
+            "snippet": "…or objects created by    :keyword:`async def` functions which use the :keyword:`[yield]` statement,    but will accept any asynchronous [generator]-like object that…",
+            "relevant": true
+          }
+        ]
+      }
+    },
+    {
+      "query": "pathlib OR paths",
+      "intent": "Робота зі шляхами та файлами",
+      "tfidf": {
+        "precision_at_5": 0.4,
+        "top_5": [
+          {
+            "path": "library/pathlib.txt",
+            "score": 24.516767243191016,
+            "snippet": "…ithout I/O, and :ref:`concrete [paths] <concrete-[paths]>`, which inherit from pure [paths] but also provide I/O operations.  .. image:: [pathlib]-inheritance.png    :a…",
+            "relevant": true
+          },
+          {
+            "path": "whatsnew/3.6.txt",
+            "score": 18.028508138093173,
+            "snippet": "…tely that assumption prevents alternative object representations of file system [paths] like :mod:`[pathlib]` from working with pre-existing code, including Python'…",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/3.11.txt",
+            "score": 16.349996345365703,
+            "snippet": "… deprecated.   (Contributed by Donghee Na in :issue:`44611`.)   .. _whatsnew311-[pathlib]:  [pathlib] -------  * :meth:`~[pathlib].Path.glob` and :meth:`~[pathlib].Path…",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/3.8.txt",
+            "score": 16.086306763220147,
+            "snippet": "…result like :meth:`~[pathlib].Path.exists`, :meth:`~[pathlib].Path.is_dir`, :meth:`~[pathlib].Path.is_file`, :meth:`~[pathlib].Path.is_mount`, :meth:`~[pathlib].Path.is_s…",
+            "relevant": false
+          },
+          {
+            "path": "library/os.txt",
+            "score": 15.597898085521955,
+            "snippet": "…lute path, make sure the first    character is not a slash (``'/'``)  Use :mod:`[pathlib]` or the    :func:`os.path.normpath` function to ensure that [paths] are pr…",
+            "relevant": true
+          }
+        ]
+      },
+      "bm25": {
+        "precision_at_5": 0.4,
+        "top_5": [
+          {
+            "path": "library/pathlib.txt",
+            "score": 11.613647778502248,
+            "snippet": "…ithout I/O, and :ref:`concrete [paths] <concrete-[paths]>`, which inherit from pure [paths] but also provide I/O operations.  .. image:: [pathlib]-inheritance.png    :a…",
+            "relevant": true
+          },
+          {
+            "path": "library/glob.txt",
+            "score": 9.300878092498689,
+            "snippet": "…ctory before calling it.  If    *pathname* is relative, the result will contain [paths] relative to    *root_dir*.     This function can support :ref:`[paths] relat…",
+            "relevant": true
+          },
+          {
+            "path": "deprecations/pending-removal-in-3.15.txt",
+            "score": 8.97968162259848,
+            "snippet": "…locale` instead.   (Contributed by Hugo van Kemenade in :gh:`111187`.)  * :mod:`[pathlib]`:   :meth:`[pathlib].PurePath.is_reserved` is deprecated and scheduled for…",
+            "relevant": false
+          },
+          {
+            "path": "library/filesys.txt",
+            "score": 8.707004774941293,
+            "snippet": "…or example, there are modules for reading the properties of files, manipulating [paths] in a portable way, and creating temporary files.  The full list of modules…",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/3.6.txt",
+            "score": 8.660745525817138,
+            "snippet": "…tely that assumption prevents alternative object representations of file system [paths] like :mod:`[pathlib]` from working with pre-existing code, including Python'…",
+            "relevant": false
+          }
+        ]
+      }
+    },
+    {
+      "query": "\"regular expression\" OR regex",
+      "intent": "Регулярні вирази, рядки та Unicode",
+      "tfidf": {
+        "precision_at_5": 0.4,
+        "top_5": [
+          {
+            "path": "library/re.txt",
+            "score": 30.891202663154527,
+            "snippet": "…f a particular string matches a given [regular] [expression] (or if a given [regular] [expression] matches a particular string, which comes down to the same thing).  Re…",
+            "relevant": true
+          },
+          {
+            "path": "howto/regex.txt",
+            "score": 27.299577140633353,
+            "snippet": ".. _[regex]-howto:  ****************************   [Regular] [Expression] HOWTO **********…",
+            "relevant": true
+          },
+          {
+            "path": "library/unittest.txt",
+            "score": 22.898833009650282,
+            "snippet": "…[regex]* matches on the       message of the triggered warning.  *[regex]* may be a [regular] [expression]       object or a string containing a [regular] [expression] suit…",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/2.1.txt",
+            "score": 18.62665455448837,
+            "snippet": "…ass:`DeprecationWarning` triggered in the :mod:`__main__` module, and applies a [regular] [expression] to only match the message about the :mod:`![regex]` module bein…",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/3.7.txt",
+            "score": 15.246525465202843,
+            "snippet": "…the locale at compile time.  Locale settings are applied only when the compiled [regular] [expression] is used. (Contributed by Serhiy Storchaka in :issue:`30215`.)…",
+            "relevant": false
+          }
+        ]
+      },
+      "bm25": {
+        "precision_at_5": 0.4,
+        "top_5": [
+          {
+            "path": "library/re.txt",
+            "score": 13.413048086882457,
+            "snippet": "…f a particular string matches a given [regular] [expression] (or if a given [regular] [expression] matches a particular string, which comes down to the same thing).  Re…",
+            "relevant": true
+          },
+          {
+            "path": "library/fnmatch.txt",
+            "score": 13.223544998963828,
+            "snippet": "…nction:: translate(pat)     Return the shell-style pattern *pat* converted to a [regular] [expression] for    using with :func:`re.match`. The pattern is expected t…",
+            "relevant": false
+          },
+          {
+            "path": "howto/regex.txt",
+            "score": 12.762616909182585,
+            "snippet": ".. _[regex]-howto:  ****************************   [Regular] [Expression] HOWTO **********…",
+            "relevant": true
+          },
+          {
+            "path": "library/compileall.txt",
+            "score": 11.358107818867069,
+            "snippet": "…rue value, the file    is skipped. This can be used to exclude files matching a [regular] [expression],    given as a :ref:`re.Pattern <re-objects>` object.     If …",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/2.1.txt",
+            "score": 11.298804652315521,
+            "snippet": "…ass:`DeprecationWarning` triggered in the :mod:`__main__` module, and applies a [regular] [expression] to only match the message about the :mod:`![regex]` module bein…",
+            "relevant": false
+          }
+        ]
+      }
+    },
+    {
+      "query": "dictionary OR hashing",
+      "intent": "Словники, ключі, хешування та протокол відображень",
+      "tfidf": {
+        "precision_at_5": 0.2,
+        "top_5": [
+          {
+            "path": "library/hashlib.txt",
+            "score": 14.330105619625028,
+            "snippet": "…default value ``True``. A false value allows the use of insecure and    blocked [hashing] algorithms in restricted environments. ``False`` indicates    that the h…",
+            "relevant": false
+          },
+          {
+            "path": "library/sys.txt",
+            "score": 11.888540924790437,
+            "snippet": "…tself or a copy. Interning strings is useful to gain a    little performance on [dictionary] lookup -- if the keys in a [dictionary] are    interned, and the lookup…",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/3.2.txt",
+            "score": 10.523997455101405,
+            "snippet": "…optparse-code` for details on the differences from :mod:`optparse`.   PEP 391:  [Dictionary] Based Configuration for Logging =====================================…",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/2.5.txt",
+            "score": 10.403503651479037,
+            "snippet": "…svg.set('height', '320px')    svg.append(elem1)  Each XML element supports some [dictionary]-like and some list-like access methods.  [Dictionary]-like operations a…",
+            "relevant": false
+          },
+          {
+            "path": "library/stdtypes.txt",
+            "score": 10.396778323924629,
+            "snippet": "…=========================  .. index::    pair: object; mapping    pair: object; [dictionary]    triple: operations on; mapping; types    triple: operations on; di…",
+            "relevant": true
+          }
+        ]
+      },
+      "bm25": {
+        "precision_at_5": 0.0,
+        "top_5": [
+          {
+            "path": "library/crypt.txt",
+            "score": 8.33887640564069,
+            "snippet": "…thout storing the actual password, or attempting to crack Unix passwords with a [dictionary].  .. index:: single: crypt(3)  Notice that the behavior of this modul…",
+            "relevant": false
+          },
+          {
+            "path": "library/hashlib.txt",
+            "score": 7.695503443877777,
+            "snippet": "…default value ``True``. A false value allows the use of insecure and    blocked [hashing] algorithms in restricted environments. ``False`` indicates    that the h…",
+            "relevant": false
+          },
+          {
+            "path": "library/hmac.txt",
+            "score": 6.28452094690953,
+            "snippet": ":mod:`!hmac` --- Keyed-[Hashing] for Message Authentication =============================================…",
+            "relevant": false
+          },
+          {
+            "path": "library/sys.txt",
+            "score": 5.376660608383499,
+            "snippet": "…tself or a copy. Interning strings is useful to gain a    little performance on [dictionary] lookup -- if the keys in a [dictionary] are    interned, and the lookup…",
+            "relevant": false
+          },
+          {
+            "path": "glossary.txt",
+            "score": 4.01861969415657,
+            "snippet": "…ide a dynamic       view on the dictionary’s entries, which means that when the [dictionary]       changes, the view reflects these changes. To force the       di…",
+            "relevant": false
+          }
+        ]
+      }
+    },
+    {
+      "query": "\"context manager\"",
+      "intent": "Протокол with і практичні контекстні менеджери",
+      "tfidf": {
+        "precision_at_5": 0.2,
+        "top_5": [
+          {
+            "path": "library/contextlib.txt",
+            "score": 18.753103419987816,
+            "snippet": "… purposes,       as :func:`~urllib.request.urlopen` would normally be used in a [context] [manager].  .. function:: aclosing(thing)     Return an async [context] mana…",
+            "relevant": true
+          },
+          {
+            "path": "library/multiprocessing.txt",
+            "score": 18.131644256616983,
+            "snippet": "… of the    referent:     .. doctest::      >>> mp_[context] = multiprocessing.get_[context]('spawn')     >>> [manager] = mp_[context].[Manager]()     >>> Global = [manager]…",
+            "relevant": false
+          },
+          {
+            "path": "library/test.txt",
+            "score": 15.9447060881142,
+            "snippet": "…elf.assertEqual(captured, \"hello\")   .. function:: disable_faulthandler()     A [context] [manager] that temporary disables :mod:`faulthandler`.   .. function:: gc_…",
+            "relevant": false
+          },
+          {
+            "path": "library/unittest.txt",
+            "score": 14.685013486848085,
+            "snippet": "…nchanged:: 3.3          Added the *msg* keyword argument when used as a [context] [manager].     .. method:: assertLogs(logger=None, level=None)        A [context] ma…",
+            "relevant": false
+          },
+          {
+            "path": "library/asyncio-task.txt",
+            "score": 14.279514192003022,
+            "snippet": "…it will     be applied; this can be useful if the delay is unknown when     the [context] [manager] is created.      In either case, the [context] [manager] can be resc…",
+            "relevant": false
+          }
+        ]
+      },
+      "bm25": {
+        "precision_at_5": 0.2,
+        "top_5": [
+          {
+            "path": "library/contextlib.txt",
+            "score": 7.727346035301899,
+            "snippet": "… purposes,       as :func:`~urllib.request.urlopen` would normally be used in a [context] [manager].  .. function:: aclosing(thing)     Return an async [context] mana…",
+            "relevant": true
+          },
+          {
+            "path": "library/tempfile.txt",
+            "score": 7.349177333942972,
+            "snippet": "…     created via builtin :func:`open`) must be closed before exiting the        [context] [manager], else the :func:`os.unlink` call on [context] [manager]        exit …",
+            "relevant": false
+          },
+          {
+            "path": "library/test.txt",
+            "score": 7.237288956383228,
+            "snippet": "…elf.assertEqual(captured, \"hello\")   .. function:: disable_faulthandler()     A [context] [manager] that temporary disables :mod:`faulthandler`.   .. function:: gc_…",
+            "relevant": false
+          },
+          {
+            "path": "library/multiprocessing.txt",
+            "score": 7.221789555115077,
+            "snippet": "… of the    referent:     .. doctest::      >>> mp_[context] = multiprocessing.get_[context]('spawn')     >>> [manager] = mp_[context].[Manager]()     >>> Global = [manager]…",
+            "relevant": false
+          },
+          {
+            "path": "library/importlib.resources.txt",
+            "score": 6.999482270533035,
+            "snippet": "…eturn a [context] [manager] for use in a :keyword:`with` statement.     The [context] [manager] provides a :class:`pathlib.Path` object.      Exiting the [context] manage…",
+            "relevant": false
+          }
+        ]
+      }
+    },
+    {
+      "query": "decorator OR decorators",
+      "intent": "Оголошення декораторів, обгортки та інспекція",
+      "tfidf": {
+        "precision_at_5": 0.2,
+        "top_5": [
+          {
+            "path": "library/unittest.mock.txt",
+            "score": 21.548678884830903,
+            "snippet": "…tospec=None, new_callable=None, **kwargs)      :func:`patch` acts as a function [decorator], class [decorator] or a context     manager. Inside the body of the func…",
+            "relevant": false
+          },
+          {
+            "path": "reference/compound_stmts.txt",
+            "score": 19.514076962756963,
+            "snippet": "…ams`] \"(\" [`parameter_list`] \")\"           : [\"->\" `expression`] \":\" `suite`    [decorators]: `[decorator]`+    [decorator]: \"@\" `assignment_expression` NEWLINE    pa…",
+            "relevant": true
+          },
+          {
+            "path": "library/typing.txt",
+            "score": 18.674345633440495,
+            "snippet": "…   [decorator].     ``@no_type_check`` mutates the decorated object in place.  .. [decorator]:: no_type_check_[decorator]     [Decorator] to give another [decorator] the …",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/2.4.txt",
+            "score": 18.468509395240087,
+            "snippet": "…alent to the following pre-[decorator] code::     def f(): ...    f = A(B(C(f)))  [Decorators] must come on the line before a function definition, one [decorator] per…",
+            "relevant": false
+          },
+          {
+            "path": "library/contextlib.txt",
+            "score": 18.443820020306116,
+            "snippet": "… :class:`ContextDecorator` so the context managers    it creates can be used as [decorators] as well as in :keyword:`with` statements.    When used as a [decorator]…",
+            "relevant": false
+          }
+        ]
+      },
+      "bm25": {
+        "precision_at_5": 0.4,
+        "top_5": [
+          {
+            "path": "library/contextlib.txt",
+            "score": 11.130877937842317,
+            "snippet": "… :class:`ContextDecorator` so the context managers    it creates can be used as [decorators] as well as in :keyword:`with` statements.    When used as a [decorator]…",
+            "relevant": false
+          },
+          {
+            "path": "reference/compound_stmts.txt",
+            "score": 10.427715934996606,
+            "snippet": "…ams`] \"(\" [`parameter_list`] \")\"           : [\"->\" `expression`] \":\" `suite`    [decorators]: `[decorator]`+    [decorator]: \"@\" `assignment_expression` NEWLINE    pa…",
+            "relevant": true
+          },
+          {
+            "path": "library/unittest.mock.txt",
+            "score": 10.295981693117344,
+            "snippet": "…tospec=None, new_callable=None, **kwargs)      :func:`patch` acts as a function [decorator], class [decorator] or a context     manager. Inside the body of the func…",
+            "relevant": false
+          },
+          {
+            "path": "library/functools.txt",
+            "score": 9.910140951804046,
+            "snippet": "…e :func:`register`    attribute of the generic function, which can be used as a [decorator].  For    functions annotated with types, the [decorator] will infer the …",
+            "relevant": true
+          },
+          {
+            "path": "whatsnew/2.4.txt",
+            "score": 9.891167359842353,
+            "snippet": "…alent to the following pre-[decorator] code::     def f(): ...    f = A(B(C(f)))  [Decorators] must come on the line before a function definition, one [decorator] per…",
+            "relevant": false
+          }
+        ]
+      }
+    },
+    {
+      "query": "heapq OR heap",
+      "intent": "Купа, черги пріоритетів та вибір найменших чи найбільших елементів",
+      "tfidf": {
+        "precision_at_5": 0.2,
+        "top_5": [
+          {
+            "path": "library/heapq.txt",
+            "score": 23.245847852630664,
+            "snippet": ":mod:`![heapq]` --- [Heap] queue algorithm ======================================  .. module:: [heapq]  …",
+            "relevant": true
+          },
+          {
+            "path": "whatsnew/2.3.txt",
+            "score": 22.71914147419315,
+            "snippet": "…eapq.heappush([heap], item)      ...      >>> [heap]      [1, 3, 5, 11, 7]      >>> [heapq].heappop([heap])      1      >>> [heapq].heappop([heap])      3      >>> [heap]    …",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/2.6.txt",
+            "score": 15.180353279803647,
+            "snippet": "…2, 8, 16]))       [1, 2, 3, 5, 8, 9, 16]    Another new function, ``heappushpop([heap], item)``,   pushes *item* onto *[heap]*, then pops off and returns the smalle…",
+            "relevant": false
+          },
+          {
+            "path": "howto/isolating-extensions.txt",
+            "score": 12.943298732276382,
+            "snippet": "…f such a type requires access to module state, the type must be converted to a *[heap]-allocated type*, or *[heap] type* for short. These correspond more closely to…",
+            "relevant": false
+          },
+          {
+            "path": "c-api/typeobj.txt",
+            "score": 12.804173294761714,
+            "snippet": "… types must be compiled for a specific Python minor version.   .. _[heap]-types:  [Heap] Types ----------  An alternative to :ref:`static types <static-types>` is *…",
+            "relevant": false
+          }
+        ]
+      },
+      "bm25": {
+        "precision_at_5": 0.2,
+        "top_5": [
+          {
+            "path": "library/heapq.txt",
+            "score": 13.876810105879185,
+            "snippet": ":mod:`![heapq]` --- [Heap] queue algorithm ======================================  .. module:: [heapq]  …",
+            "relevant": true
+          },
+          {
+            "path": "library/datatypes.txt",
+            "score": 11.664842736517326,
+            "snippet": "…a variety of specialized data types such as dates and times, fixed-type arrays, [heap] queues, double-ended queues, and enumerations.  Python also provides some b…",
+            "relevant": false
+          },
+          {
+            "path": "whatsnew/2.3.txt",
+            "score": 11.05305500413244,
+            "snippet": "…eapq.heappush([heap], item)      ...      >>> [heap]      [1, 3, 5, 11, 7]      >>> [heapq].heappop([heap])      1      >>> [heapq].heappop([heap])      3      >>> [heap]    …",
+            "relevant": false
+          },
+          {
+            "path": "tutorial/stdlib2.txt",
+            "score": 9.275516308648522,
+            "snippet": "…'perl'), (200, 'tcl'), (300, 'ruby'), (400, 'lua'), (500, 'python')]  The :mod:`[heapq]` module provides functions for implementing heaps based on regular lists. …",
+            "relevant": false
+          },
+          {
+            "path": "howto/isolating-extensions.txt",
+            "score": 7.174978630806933,
+            "snippet": "…f such a type requires access to module state, the type must be converted to a *[heap]-allocated type*, or *[heap] type* for short. These correspond more closely to…",
+            "relevant": false
+          }
+        ]
+      }
+    }
+  ],
+  "mean_precision_at_5": {
+    "tfidf": 0.38,
+    "bm25": 0.38
+  },
+  "demo_query": "python AND (async OR await) NOT java \"event loop\"",
+  "demo_results": [
+    {
+      "path": "library/asyncio-task.txt",
+      "score": 18.587214778693177,
+      "snippet": "…nning_[loop]()           deadline = [loop].time() + 20           try:               [async] with asyncio.timeout_at(deadline):                   [await] long_running_ta…"
+    },
+    {
+      "path": "library/asyncio-dev.txt",
+      "score": 17.880748132769973,
+      "snippet": "…ent [loop], no other Tasks can run in the same thread.  When a Task executes an ``[await]`` expression, the running Task gets suspended, and the [event] [loop] executes…"
+    },
+    {
+      "path": "library/asyncio-eventloop.txt",
+      "score": 17.752192865206883,
+      "snippet": "…    In some future [Python] release this will become an error.  .. function:: set_[event]_[loop]([loop])     Set *[loop]* as the current [event] [loop] for the current OS thr…"
+    },
+    {
+      "path": "library/asyncio.txt",
+      "score": 17.424984946714435,
+      "snippet": "…ncio.run(main())  asyncio is a library to write **concurrent** code using the **[async]/[await]** syntax.  asyncio is used as a foundation for multiple [Python] async…"
+    },
+    {
+      "path": "library/asyncio-runner.txt",
+      "score": 17.224110039476095,
+      "snippet": "…[async] functions should be called in the same :ref:`[event]    [loop] <asyncio-[event]-[loop]>` and :class:`contextvars.Context`.     If *debug* is ``True``, the [event] l…"
+    }
+  ],
+  "cache_info": {
+    "hits": 11,
+    "misses": 12,
+    "maxsize": 256,
+    "currsize": 12
+  },
+  "closed_after_with": true
+}

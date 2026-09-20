@@ -9,8 +9,9 @@ from findex.corpus import Document
 from findex.index import STORAGES, build_index
 from findex.index import main as index_main
 from findex.models import DocMeta, Posting, pairs
+from findex.search import boolean_search as search
 from findex.search import main as search_main
-from findex.search import merge_and, merge_not, merge_or, search
+from findex.search import merge_and, merge_not, merge_or
 from findex.store import load, save
 
 
