@@ -1,0 +1,27 @@
+{
+  "version": "0.4.0",
+  "platform": "Windows",
+  "python": "3.12.5",
+  "pytest": {"passed": 239, "seconds": 6.93, "cli_tests": 29},
+  "pyright": {"mode": "strict", "errors": 0, "warnings": 0},
+  "coverage": {
+    "combined_percent": 92.94920394238059,
+    "covered_lines": 952,
+    "statements": 1005,
+    "covered_branches": 274,
+    "branches": 314,
+    "cli_combined_percent": 100
+  },
+  "corpus_search": {
+    "documents": 503,
+    "query": "\"event loop\"",
+    "k": 5,
+    "tracemalloc": true,
+    "load_ms": 22024.266,
+    "search_ms": 550.662,
+    "total_seconds": 23.124,
+    "peak_mib": 166.331,
+    "first_path": "library/asyncio-policy.txt",
+    "first_score": 7.272381533610824
+  }
+}

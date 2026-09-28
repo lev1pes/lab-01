@@ -188,8 +188,30 @@ def test_ranked_results_protocol_and_topk():
     assert "2.00000" in str(b)
 
 
+@pytest.mark.parametrize("scorer", [BM25(b=0), TfIdf()])
+def test_rare_term_and_diminishing_gain(scorer):
+    index = build(["rare common", "common", "common"])
+    assert scorer.score("rare", Posting(0, 1), index) > scorer.score(
+        "common", Posting(0, 1), index
+    )
+    values = [scorer.score("rare", Posting(0, tf), index) for tf in (1, 2, 19, 20)]
+    assert 0 < values[3] - values[2] < 0.1 * (values[1] - values[0])
+
+
+@pytest.mark.parametrize("scorer", [BM25(), TfIdf()])
+def test_length_normalization_difference(scorer):
+    index = build(["word", "word " + "other " * 1000])
+    short = scorer.score("word", Posting(0, 1), index)
+    long = scorer.score("word", Posting(1, 1), index)
+    if isinstance(scorer, BM25):
+        assert short > long
+    else:
+        # Ця формула TF-IDF не нормалізує довжину: очікувана нічия.
+        assert short == long
+
+
 def test_cache_isolation_and_timing(caplog):
-    with caplog.at_level(logging.INFO, logger="findex"):
+    with caplog.at_level(logging.DEBUG, logger="findex"):
         first = build(["a"])
         second = build(["b"])
         search(first, "a")
@@ -205,7 +227,7 @@ def test_cache_isolation_and_timing(caplog):
         """Опис збережено."""
         raise RuntimeError("перевірка")
 
-    with caplog.at_level(logging.INFO, logger="findex"), pytest.raises(RuntimeError):
+    with caplog.at_level(logging.DEBUG, logger="findex"), pytest.raises(RuntimeError):
         broken()
     assert "broken:" in caplog.text and broken.__doc__ == "Опис збережено."
 
@@ -245,7 +267,7 @@ def test_ranked_cli(tmp_path, capsys, caplog):
 
     path = tmp_path / "index.bin"
     save(build(["python async event loop", "python java event loop"]), path)
-    with caplog.at_level(logging.INFO, logger="findex"):
+    with caplog.at_level(logging.DEBUG, logger="findex"):
         main(
             [
                 str(path),

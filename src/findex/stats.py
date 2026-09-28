@@ -64,9 +64,12 @@ def main(argv: Sequence[str] | None = None) -> None:
         "--json", action="store_true", help="вивести результат у форматі JSON"
     )
     args = parser.parse_args(argv)
+    if __name__ == "__main__":
+        from findex.cli import configure_logging
+
+        configure_logging(2 if getattr(args, "verbose", False) else 1)
     if not args.root.is_dir():
         parser.error(f"каталог корпусу не існує: {args.root}")
-    logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
 
     collector = collect_lazy if args.mode == "lazy" else collect_eager
     tracemalloc.start()
@@ -99,8 +102,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         print(f"Документів: {result.documents}")
         print(f"Токенів: {result.tokens}")
         print(f"Розмір словника: {len(result.counts)}")
-        print(f"Час: {elapsed:.3f} с")
-        print(f"Пікова пам’ять: {peak / 1024**2:.3f} МіБ")
+        logging.getLogger("findex").info("Час: %.3f с", elapsed)
+        logging.getLogger("findex").info("Пікова пам’ять: %.3f МіБ", peak / 1024**2)
         print("Топ-50 термінів:")
         for term, count in top:
             print(f"{term}\t{count}")

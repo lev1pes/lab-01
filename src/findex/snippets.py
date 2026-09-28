@@ -2,11 +2,12 @@
 
 import unicodedata
 from collections import Counter
+from collections.abc import Iterator
 
 from findex.tokenize import tokenize
 
 
-def matching_spans(text: str, terms: set[str]):
+def matching_spans(text: str, terms: set[str]) -> Iterator[tuple[int, int, str]]:
     start = None
     for i in range(len(text) + 1):
         character = text[i] if i < len(text) else " "
@@ -38,7 +39,7 @@ def snippet(text: str, terms: set[str], radius: int = 80) -> str:
         )
     # Ковзне вікно: кожне входження додається й видаляється не більше разу.
     left = right = 0
-    counts = Counter()
+    counts: Counter[str] = Counter()
     best = (-1, -1)
     chosen = spans[0]
     for match in spans:

@@ -185,13 +185,12 @@ def test_cli_saved_search_without_corpus(tmp_path, capsys, suffix):
     text.write_text("Кіт кіт", encoding="utf-8")
     target = tmp_path / f"index.{suffix}"
     index_main([str(corpus), "--out", str(target)])
-    assert "Пікова пам'ять" in capsys.readouterr().out
+    assert "Документів: 1" in capsys.readouterr().out
     text.unlink()
     search_main([str(target), "кіт", "--engine", "set"])
     output = capsys.readouterr().out
     assert "Знайдено документів: 1" in output
     assert "a.txt" in output
-    assert "Загальний час" in output
 
 
 def test_invalid_cli_arguments(tmp_path):

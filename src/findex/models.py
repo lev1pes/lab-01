@@ -1,11 +1,14 @@
 """Структури інвертованого індексу та три способи зберігання постінгів."""
 
+from __future__ import annotations
+
 import logging
 from array import array
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from functools import cached_property, lru_cache
 from types import MappingProxyType
+from typing import Literal, NamedTuple, TypedDict, cast
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,14 +33,32 @@ class PlainPosting:
 
 @dataclass(slots=True)
 class ArrayPostings:
-    doc_ids: array
-    tfs: array
+    doc_ids: array[int]
+    tfs: array[int]
 
     def __len__(self) -> int:
         return len(self.doc_ids)
 
 
-type PostingList = list[Posting] | list[PlainPosting] | ArrayPostings
+type Storage = Literal["plain", "slots", "array"]
+type PostingList = list[Posting | PlainPosting] | ArrayPostings
+type Positions = dict[str, dict[int, tuple[int, ...]]]
+
+
+class IndexState(TypedDict):
+    postings: dict[str, PostingList]
+    doc_lengths: dict[int, int]
+    doc_meta: dict[int, DocMeta]
+    storage: Storage
+    positions: Positions | None
+    texts: dict[int, str]
+
+
+class CacheInfo(NamedTuple):
+    hits: int
+    misses: int
+    maxsize: int | None
+    currsize: int
 
 
 class Index(Mapping[str, tuple[Posting, ...]]):
@@ -45,113 +66,113 @@ class Index(Mapping[str, tuple[Posting, ...]]):
 
     def __init__(
         self,
-        postings,
-        doc_lengths,
-        doc_meta,
-        storage="slots",
-        positions=None,
-        texts=None,
-    ):
+        postings: dict[str, PostingList],
+        doc_lengths: dict[int, int],
+        doc_meta: dict[int, DocMeta],
+        storage: Storage = "slots",
+        positions: Positions | None = None,
+        texts: dict[int, str] | None = None,
+    ) -> None:
         self._postings = postings
         self._doc_lengths = doc_lengths
         self._doc_meta = doc_meta
-        self.storage = storage
+        self.storage: Storage = storage
         self._positions = positions
         self._texts = texts or {}
         self.closed = False
 
         # Ключ кешу — лише рядок; індекси не ділять відповіді між собою.
         @lru_cache(maxsize=256)
-        def cached_ids(query):
+        def cached_ids(query: str) -> frozenset[int]:
             return self._evaluate_query(query)
 
         self._cached_ids = cached_ids
 
-    def _check_open(self):
+    def _check_open(self) -> None:
         if self.closed:
             raise ValueError("Індекс уже закрито")
 
-    def __len__(self):
+    def __len__(self) -> int:
         self._check_open()
         return len(self._postings)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         self._check_open()
         return iter(self._postings)
 
-    def __contains__(self, term):
+    def __contains__(self, term: object) -> bool:
         self._check_open()
         return term in self._postings
 
-    def __getitem__(self, term):
+    def __getitem__(self, term: str) -> tuple[Posting, ...]:
         self._check_open()
         # Незмінний знімок не дозволяє зіпсувати індекс через публічний API.
         return tuple(Posting(doc, tf) for doc, tf in pairs(self._postings[term]))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.closed:
             return "Index(closed=True)"
         return f"Index(terms={len(self)}, docs={self.num_docs})"
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Index):
             return NotImplemented
         return self.__getstate__() == other.__getstate__()
 
     @property
-    def num_docs(self):
+    def num_docs(self) -> int:
         self._check_open()
         return len(self._doc_lengths)
 
     @cached_property
-    def avg_doc_length(self):
+    def avg_doc_length(self) -> float:
         return sum(self.doc_lengths.values()) / self.num_docs if self.num_docs else 0.0
 
-    def doc_length(self, doc_id):
+    def doc_length(self, doc_id: int) -> int:
         return self.doc_lengths[doc_id]
 
-    def df(self, term):
+    def df(self, term: str) -> int:
         self._check_open()
         return len(self._postings.get(term, ()))
 
     @property
-    def postings(self):
+    def postings(self) -> Index:
         """Сумісний із лабораторною 2 інтерфейс словника."""
         self._check_open()
         return self
 
     @property
-    def doc_lengths(self):
+    def doc_lengths(self) -> Mapping[int, int]:
         self._check_open()
         return MappingProxyType(self._doc_lengths)
 
     @property
-    def doc_meta(self):
+    def doc_meta(self) -> Mapping[int, DocMeta]:
         self._check_open()
         return MappingProxyType(self._doc_meta)
 
     @property
-    def texts(self):
+    def texts(self) -> Mapping[int, str]:
         self._check_open()
         return MappingProxyType(self._texts)
 
     @property
-    def has_positions(self):
+    def has_positions(self) -> bool:
         self._check_open()
         return self._positions is not None
 
-    def positions(self, term, doc_id):
+    def positions(self, term: str, doc_id: int) -> tuple[int, ...]:
         self._check_open()
-        if not self.has_positions:
+        if self._positions is None:
             raise ValueError("Фразовий пошук потребує побудови з --positions")
         return self._positions.get(term, {}).get(doc_id, ())
 
-    def _evaluate_query(self, query):
+    def _evaluate_query(self, query: str) -> frozenset[int]:
         from findex.query import parse
 
         return frozenset(parse(query).evaluate(self))
 
-    def matched_ids(self, query):
+    def matched_ids(self, query: str) -> frozenset[int]:
         self._check_open()
         before = self._cached_ids.cache_info()
         result = self._cached_ids(query)
@@ -165,10 +186,10 @@ class Index(Mapping[str, tuple[Posting, ...]]):
         )
         return result
 
-    def cache_info(self):
-        return self._cached_ids.cache_info()
+    def cache_info(self) -> CacheInfo:
+        return CacheInfo(*self._cached_ids.cache_info())
 
-    def close(self):
+    def close(self) -> None:
         """Звільнити власні буфери й кеш; зовнішні знімки належать викликачеві."""
         self._cached_ids.cache_clear()
         self._postings.clear()
@@ -180,9 +201,9 @@ class Index(Mapping[str, tuple[Posting, ...]]):
         self.__dict__.pop("avg_doc_length", None)
         self.closed = True
 
-    def __getstate__(self):
+    def __getstate__(self) -> IndexState:
         self._check_open()
-        return dict(
+        return IndexState(
             postings=self._postings,
             doc_lengths=self._doc_lengths,
             doc_meta=self._doc_meta,
@@ -191,14 +212,18 @@ class Index(Mapping[str, tuple[Posting, ...]]):
             texts=self._texts,
         )
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: object) -> None:
         # Старий slotted Index лабораторної 2 мав стан (None, словник).
         if isinstance(state, tuple):
-            state = state[1]
-        self.__init__(**state)
+            state = cast(tuple[object, object], state)[1]
+        # Pickle лише довірений; load додатково перевіряє відновлений індекс.
+        restored = cast(IndexState, state)
+        self.__init__(**restored)
 
 
-def pairs(postings: PostingList) -> Iterator[tuple[int, int]]:
+def pairs(
+    postings: Sequence[Posting | PlainPosting] | ArrayPostings,
+) -> Iterator[tuple[int, int]]:
     """Однаковий інтерфейс для об'єктів та компактних масивів."""
     if isinstance(postings, ArrayPostings):
         yield from zip(postings.doc_ids, postings.tfs, strict=True)
@@ -207,7 +232,9 @@ def pairs(postings: PostingList) -> Iterator[tuple[int, int]]:
             yield posting.doc_id, posting.tf
 
 
-def document_ids(postings: PostingList) -> list[int]:
+def document_ids(
+    postings: Sequence[Posting | PlainPosting] | ArrayPostings,
+) -> list[int]:
     if isinstance(postings, ArrayPostings):
         return list(postings.doc_ids)
     return [posting.doc_id for posting in postings]

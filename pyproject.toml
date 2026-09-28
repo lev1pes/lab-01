@@ -1,13 +1,19 @@
 [project]
 name = "findex"
-version = "0.1.0"
-description = "findex: текстовий корпус, інвертований індекс та булевий пошук"
+version = "0.4.0"
+description = "findex: інвертований індекс і ранжований пошук з командного рядка"
 readme = "README.md"
 authors = [
     { name = "lev1pes", email = "96699273+lev1pes@users.noreply.github.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "rich>=15.0.0",
+    "typer>=0.27.2",
+]
+
+[project.scripts]
+findex = "findex.cli:app"
 
 [build-system]
 requires = ["uv_build>=0.12.14,<0.13.0"]
@@ -15,7 +21,10 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "hypothesis>=6.168.3",
+    "pyright>=1.1.414",
     "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
     "ruff>=0.16.7",
 ]
 
@@ -28,3 +37,18 @@ select = ["E", "F", "I", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["slow: перевірки, що тривають понад секунду"]
+
+[tool.pyright]
+include = ["src/findex"]
+typeCheckingMode = "strict"
+pythonVersion = "3.12"
+venvPath = "."
+venv = ".venv"
+
+[tool.coverage.run]
+branch = true
+source = ["findex"]
+
+[tool.coverage.report]
+show_missing = true

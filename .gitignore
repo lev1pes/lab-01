@@ -10,3 +10,8 @@ docs/
 artifacts/
 index.bin
 index.json
+.coverage
+coverage.json
+coverage.xml
+htmlcov/
+.hypothesis/

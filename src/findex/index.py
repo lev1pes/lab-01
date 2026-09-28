@@ -10,33 +10,47 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 
 from findex.corpus import Document, iter_documents
-from findex.models import ArrayPostings, DocMeta, Index, PlainPosting, Posting
+from findex.models import (
+    ArrayPostings,
+    DocMeta,
+    Index,
+    PlainPosting,
+    Posting,
+    PostingList,
+    Storage,
+)
 from findex.timing import timed
 from findex.tokenize import tokenize
 
-STORAGES = ("plain", "slots", "array")
+STORAGES: tuple[Storage, ...] = ("plain", "slots", "array")
 
 
 @timed
 def build_index(
-    documents: Iterable[Document], storage: str = "slots", *, positions=False
+    documents: Iterable[Document],
+    storage: Storage = "slots",
+    *,
+    positions: bool = False,
 ) -> Index:
     """Номер документа зростає, тому постінги одразу відсортовані."""
     if storage not in STORAGES:
         raise ValueError(f"Невідоме зберігання: {storage}")
-    if storage == "array":
-        postings = defaultdict(lambda: ArrayPostings(array("I"), array("I")))
-    else:
-        postings = defaultdict(list)
+
+    def new_postings() -> PostingList:
+        return ArrayPostings(array("I"), array("I")) if storage == "array" else []
+
+    postings: defaultdict[str, PostingList] = defaultdict(new_postings)
     lengths: dict[int, int] = {}
     metadata: dict[int, DocMeta] = {}
     record = PlainPosting if storage == "plain" else Posting
-    offsets = defaultdict(dict) if positions else None
-    texts = {}
+    offsets: defaultdict[str, dict[int, tuple[int, ...]]] | None = (
+        defaultdict(dict) if positions else None
+    )
+    texts: dict[int, str] = {}
     for doc_id, document in enumerate(documents):
-        if positions:
-            local_positions = defaultdict(list)
-            counts = Counter()
+        if offsets is not None:
+            local_positions: defaultdict[str, list[int]] = defaultdict(list)
+            counts: Counter[str] = Counter()
             for offset, term in enumerate(tokenize(document.text)):
                 counts[term] += 1
                 local_positions[term].append(offset)
@@ -50,17 +64,18 @@ def build_index(
         title = document.path.stem.replace("_", " ")
         metadata[doc_id] = DocMeta(document.doc_id, title)
         for term, tf in counts.items():
-            if storage == "array":
-                postings[term].doc_ids.append(doc_id)
-                postings[term].tfs.append(tf)
+            items = postings[term]
+            if isinstance(items, ArrayPostings):
+                items.doc_ids.append(doc_id)
+                items.tfs.append(tf)
             else:
-                postings[term].append(record(doc_id, tf))
+                items.append(record(doc_id, tf))
     return Index(
         dict(postings),
         lengths,
         metadata,
         storage,
-        dict(offsets) if positions else None,
+        dict(offsets) if offsets is not None else None,
         texts,
     )
 
@@ -78,10 +93,10 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     parser.add_argument("--verbose", action="store_true", help="показувати журнал часу")
     args = parser.parse_args(argv)
-    logging.basicConfig(
-        level=logging.INFO if args.verbose else logging.WARNING,
-        format="%(levelname)s: %(message)s",
-    )
+    if __name__ == "__main__":
+        from findex.cli import configure_logging
+
+        configure_logging(2 if getattr(args, "verbose", False) else 1)
     tracemalloc.start()
     started = time.perf_counter()
     try:
@@ -99,10 +114,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     print(f"Документів: {len(index.doc_meta)}")
     print(f"Токенів: {sum(index.doc_lengths.values())}")
     print(f"Термінів: {len(index.postings)}")
-    print(f"Побудова: {built - started:.3f} с")
-    print(f"Збереження: {finished - built:.3f} с")
-    print(f"Загальний час: {finished - started:.3f} с")
-    print(f"Пікова пам'ять: {peak / 1024**2:.3f} МіБ")
+    log = logging.getLogger("findex")
+    log.info("Побудова: %.3f с", built - started)
+    log.info("Збереження: %.3f с", finished - built)
+    log.info("Загальний час: %.3f с", finished - started)
+    log.info("Пікова пам'ять: %.3f МіБ", peak / 1024**2)
     print(f"Файл: {args.out} ({args.out.stat().st_size} байтів)")
 
 
