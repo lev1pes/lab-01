@@ -229,6 +229,26 @@ def crawl_command(
         Console().print(f"Збережено {stats.pages} сторінок: {out}", markup=False)
 
 
+@app.command("serve")
+def serve_command(
+    port: Annotated[int | None, typer.Option(min=1, max=65535)] = None,
+    workers: Annotated[int | None, typer.Option(min=1, max=16)] = None,
+) -> None:
+    """Відкрити HTTP API та сторінку пошуку; конфіг — зі змінних оточення."""
+    import uvicorn
+
+    from findex.web.settings import get_settings
+
+    with operation(trace_memory=False):
+        settings = get_settings()
+        uvicorn.run(
+            "findex.web:app",
+            host=settings.host,
+            port=port or settings.port,
+            workers=workers or settings.workers,
+        )
+
+
 def highlighted(text: str) -> Text:
     """Текст корпусу не виконується як Rich-розмітка."""
     result = Text(text)

@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: findex-lab07
+    runtime: docker
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      - key: INDEX_PATH
+        value: /app/data/web-index.json
+      - key: HOST
+        value: 0.0.0.0
+      - key: WORKERS
+        value: "1"

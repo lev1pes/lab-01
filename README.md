@@ -1,4 +1,23 @@
-# findex — лабораторні роботи 1–6
+# findex — лабораторні роботи 1–7
+
+## Лабораторна 7: вебпошук (підготовка розгортання)
+
+Версія 0.7.0. FastAPI API: `/search`, `/docs/{doc_id}`, `/stats`, `/health`;
+сторінка пошуку `/`, перегляд документа `/doc/{doc_id}`, OpenAPI `/docs`.
+Публічну адресу й остаточну таблицю вимірів буде додано після перевірки Render.
+
+```powershell
+uv sync --locked
+uv run findex index data/python-docs --out data/web-index.json --positions --executor serial
+$env:INDEX_PATH = 'data/web-index.json'
+uv run findex serve --port 8000 --workers 1
+```
+
+Docker використовує uv.lock, два етапи збірки й користувача `findex` без root.
+Індекс документації Python будується під час збірки; конфігурація сервісу —
+`INDEX_PATH`, `HOST`, `PORT`, `WORKERS`. `render.yaml` задає free-план та `/health`.
+Локального Docker на машині немає: контейнер перевіряється окремим job у CI.
+Тег `lab-07` буде створено після перевірки публічного сервісу.
 
 [![CI](https://github.com/lev1pes/lab-01/actions/workflows/ci.yml/badge.svg)](https://github.com/lev1pes/lab-01/actions/workflows/ci.yml)
 
