@@ -80,7 +80,7 @@ def test_semantic_roundtrip_and_best_chunk(tiny_index, tmp_path):
     ranked = retrieve(
         tiny_index, "concurrency", mode="semantic", semantic=restored, encoder=encoder
     )
-    assert ranked[0].doc_id == 0
+    assert ranked[0].title == "a"
     assert len({r.doc_id for r in ranked}) == len(ranked)
     hybrid = retrieve(
         tiny_index,
@@ -89,7 +89,7 @@ def test_semantic_roundtrip_and_best_chunk(tiny_index, tmp_path):
         semantic=restored,
         encoder=encoder,
     )
-    assert hybrid[0].doc_id == 0
+    assert hybrid[0].title == "a"
     metadata = json.loads((tmp_path / "metadata.json").read_text(encoding="utf-8"))
     metadata["corpus_hash"] = "wrong"
     (tmp_path / "metadata.json").write_text(json.dumps(metadata), encoding="utf-8")
@@ -146,7 +146,7 @@ def test_modes_in_api_and_ui(tiny_index):
             "/search", params={"q": "concurrency", "mode": "semantic", "k": 1}
         )
         assert response.status_code == 200
-        assert response.json()["results"][0]["doc_id"] == 0
+        assert response.json()["results"][0]["title"] == "a"
         html = client.get(
             "/", params={"q": "concurrency", "mode": "hybrid", "k": 1}
         ).text
@@ -177,7 +177,7 @@ def test_embed_and_search_cli(index_path, tmp_path, monkeypatch):
         ],
     )
     assert result.exit_code == 0, result.output
-    assert json.loads(result.stdout.splitlines()[0])["doc_id"] == 0
+    assert json.loads(result.stdout.splitlines()[0])["title"] == "a"
 
 
 def test_empty_semantic(tiny_corpus, tmp_path):

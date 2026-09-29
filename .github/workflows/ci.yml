@@ -72,7 +72,12 @@ jobs:
           restore-keys: |
             perf-${{ runner.os }}-${{ github.ref_name }}-
       - name: Search та build — поріг регресії медіани 50%
-        run: uv run pytest tests/test_performance_semantic.py -k benchmark --benchmark-only --benchmark-autosave --benchmark-compare --benchmark-compare-fail=median:50% --benchmark-min-rounds=20 --benchmark-json=benchmark.json
+        run: |
+          comparison=()
+          if find .benchmarks -name '*.json' -print -quit 2>/dev/null | grep -q .; then
+            comparison=(--benchmark-compare --benchmark-compare-fail=median:50%)
+          fi
+          uv run pytest tests/test_performance_semantic.py -k benchmark --benchmark-only --benchmark-autosave --benchmark-min-rounds=20 --benchmark-json=benchmark.json "${comparison[@]}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
