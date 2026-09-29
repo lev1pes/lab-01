@@ -10,6 +10,7 @@ class SearchParams(BaseModel):
     q: str = Field(min_length=1, max_length=300)
     k: int = Field(default=10, ge=1, le=100)
     scorer: Literal["bm25", "tfidf"] = "bm25"
+    mode: Literal["keyword", "semantic", "hybrid"] = "keyword"
     page: int = Field(default=1, ge=1, le=10000)
 
     @field_validator("q")

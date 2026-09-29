@@ -23,13 +23,13 @@ from findex.models import (
 from findex.timing import timed
 from findex.tokenize import tokenize
 
-STORAGES: tuple[Storage, ...] = ("plain", "slots", "array")
+STORAGES: tuple[Storage, ...] = ("plain", "slots", "array", "numpy")
 
 
 @timed
 def build_index(
     documents: Iterable[Document],
-    storage: Storage = "slots",
+    storage: Storage = "numpy",
     *,
     positions: bool = False,
 ) -> Index:
@@ -38,7 +38,7 @@ def build_index(
 
 def build_state(
     documents: Iterable[Document],
-    storage: Storage = "slots",
+    storage: Storage = "numpy",
     *,
     positions: bool = False,
     start_id: int = 0,
@@ -79,7 +79,7 @@ def build_state(
             if isinstance(items, ArrayPostings):
                 items.doc_ids.append(doc_id)
                 items.tfs.append(tf)
-            else:
+            elif isinstance(items, list):
                 items.append(record(doc_id, tf))
     return IndexState(
         postings=dict(postings),

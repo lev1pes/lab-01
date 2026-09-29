@@ -152,7 +152,7 @@ class SearchResult:
 
 
 @timed
-def search(
+def search_reference(
     index: Index, query: str, scorer: Scorer | None = None, k: int = 10
 ) -> list[SearchResult]:
     """Ранжувати булеву відповідь; NOT фільтрує, але не додає позитивних балів."""
@@ -244,6 +244,30 @@ def main(argv: Sequence[str] | None = None) -> None:
     log.info("Пошук: %.6f с", finished - loaded)
     log.info("Загальний час: %.6f с", finished - started)
     log.info("Пікова пам'ять: %.3f МіБ", peak / 1024**2)
+
+
+@timed
+def search(
+    index: Index, query: str, scorer: Scorer | None = None, k: int = 10
+) -> list[SearchResult]:
+    """NumPy для стандартних скорерів; duck-typed скорер має старий шлях."""
+    from findex.vector import rank_numpy
+
+    if type(k) is not int or k < 0:
+        raise ValueError("k має бути невід'ємним цілим числом")
+    algorithm = BM25() if scorer is None else scorer
+    if not isinstance(algorithm, (BM25, TfIdf)):
+        return search_reference(index, query, algorithm, k)
+    terms = parse(query).terms()
+    return [
+        SearchResult(
+            doc,
+            score,
+            index.doc_meta[doc].title,
+            snippet(index.texts.get(doc, ""), terms),
+        )
+        for doc, score in rank_numpy(index, query, algorithm, k)
+    ]
 
 
 if __name__ == "__main__":

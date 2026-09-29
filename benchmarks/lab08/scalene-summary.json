@@ -1,0 +1,86 @@
+[
+  {
+    "file": "tokenize.py",
+    "function": "tokenize",
+    "python": 3.189429278494475,
+    "native": 28.498635923932117,
+    "system": 1.7160893841792701
+  },
+  {
+    "file": "snippets.py",
+    "function": "matching_spans",
+    "python": 1.712436006719783,
+    "native": 16.106131316605982,
+    "system": 1.377073799107715
+  },
+  {
+    "file": "store.py",
+    "function": "from_json",
+    "python": 0.00047999046792261284,
+    "native": 14.320400898478683,
+    "system": 1.9663331580394412
+  },
+  {
+    "file": "store.py",
+    "function": "validate",
+    "python": 3.16364772020134,
+    "native": 6.0602119041711955,
+    "system": 0.7922353370047724
+  },
+  {
+    "file": "models.py",
+    "function": "Index.__getitem__",
+    "python": 0.31934710762611446,
+    "native": 5.845140295978961,
+    "system": 0.6054534440595006
+  },
+  {
+    "file": "models.py",
+    "function": "Index.positions",
+    "python": 0.13461223588322674,
+    "native": 0.7456712909306238,
+    "system": 0.09694931600531231
+  },
+  {
+    "file": "models.py",
+    "function": "Index.doc_lengths",
+    "python": 0.041082603506408896,
+    "native": 0.8228526966970936,
+    "system": 0.004716115635753394
+  },
+  {
+    "file": "models.py",
+    "function": "pairs",
+    "python": 0.2706546537367318,
+    "native": 0.20129219766974857,
+    "system": 0.09739976682715584
+  },
+  {
+    "file": "models.py",
+    "function": "Index.doc_length",
+    "python": 0.034546324778143914,
+    "native": 0.399779383141484,
+    "system": 0.0
+  },
+  {
+    "file": "models.py",
+    "function": "Index._check_open",
+    "python": 0.21726219126814866,
+    "native": 0.0,
+    "system": 0.005325213559631368
+  },
+  {
+    "file": "snippets.py",
+    "function": "snippet",
+    "python": 0.16716547201328713,
+    "native": 0.0,
+    "system": 0.0
+  },
+  {
+    "file": "models.py",
+    "function": "Index.close",
+    "python": 0.0,
+    "native": 0.0,
+    "system": 0.0
+  }
+]

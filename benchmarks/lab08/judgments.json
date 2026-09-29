@@ -1,0 +1,160 @@
+{
+  "method": "Тематична розмітка за змістом документації, зафіксована до порівняння моделей. Не є вичерпною оцінкою всього корпусу.",
+  "queries": [
+    {
+      "query": "\"event loop\"",
+      "intent": "Подієвий цикл asyncio, керування ним та запуск задач",
+      "relevant": [
+        "library/asyncio-eventloop.txt",
+        "library/asyncio-policy.txt",
+        "library/asyncio-runner.txt",
+        "library/asyncio-task.txt",
+        "library/asyncio.txt"
+      ]
+    },
+    {
+      "query": "dataclass OR dataclasses",
+      "intent": "Генерація класів даних, типізація та застосування з іншими класами",
+      "relevant": [
+        "library/dataclasses.txt",
+        "library/typing.txt",
+        "library/enum.txt",
+        "howto/enum.txt",
+        "library/collections.txt"
+      ]
+    },
+    {
+      "query": "pickle OR serialization",
+      "intent": "Серіалізація Python-об'єктів та пов'язані механізми",
+      "relevant": [
+        "library/pickle.txt",
+        "library/pickletools.txt",
+        "library/copyreg.txt",
+        "library/shelve.txt",
+        "library/copy.txt"
+      ]
+    },
+    {
+      "query": "generator OR yield",
+      "intent": "Семантика та використання генераторів",
+      "relevant": [
+        "reference/expressions.txt",
+        "tutorial/classes.txt",
+        "howto/functional.txt",
+        "reference/datamodel.txt",
+        "library/inspect.txt"
+      ]
+    },
+    {
+      "query": "pathlib OR paths",
+      "intent": "Робота зі шляхами та файлами",
+      "relevant": [
+        "library/pathlib.txt",
+        "library/os.path.txt",
+        "library/os.txt",
+        "library/glob.txt",
+        "library/shutil.txt"
+      ]
+    },
+    {
+      "query": "\"regular expression\" OR regex",
+      "intent": "Регулярні вирази, рядки та Unicode",
+      "relevant": [
+        "library/re.txt",
+        "howto/regex.txt",
+        "library/string.txt",
+        "howto/unicode.txt",
+        "reference/lexical_analysis.txt"
+      ]
+    },
+    {
+      "query": "dictionary OR hashing",
+      "intent": "Словники, ключі, хешування та протокол відображень",
+      "relevant": [
+        "library/stdtypes.txt",
+        "tutorial/datastructures.txt",
+        "reference/datamodel.txt",
+        "library/collections.txt",
+        "library/collections.abc.txt"
+      ]
+    },
+    {
+      "query": "\"context manager\"",
+      "intent": "Протокол with і практичні контекстні менеджери",
+      "relevant": [
+        "library/contextlib.txt",
+        "reference/compound_stmts.txt",
+        "reference/datamodel.txt",
+        "library/threading.txt",
+        "library/decimal.txt"
+      ]
+    },
+    {
+      "query": "decorator OR decorators",
+      "intent": "Оголошення декораторів, обгортки та інспекція",
+      "relevant": [
+        "library/functools.txt",
+        "library/dataclasses.txt",
+        "reference/compound_stmts.txt",
+        "howto/descriptor.txt",
+        "library/inspect.txt"
+      ]
+    },
+    {
+      "query": "heapq OR heap",
+      "intent": "Купа, черги пріоритетів та вибір найменших чи найбільших елементів",
+      "relevant": [
+        "library/heapq.txt",
+        "library/queue.txt",
+        "library/asyncio-queue.txt",
+        "howto/sorting.txt",
+        "library/bisect.txt"
+      ]
+    },
+    {
+      "query": "reviving possessions",
+      "intent": "Відновити збережені об’єкти",
+      "relevant": [
+        "library/pickle.txt"
+      ],
+      "paraphrase": true,
+      "target_token_overlap": []
+    },
+    {
+      "query": "collaborative multitasking",
+      "intent": "Організувати конкурентні задачі",
+      "relevant": [
+        "library/asyncio-task.txt"
+      ],
+      "paraphrase": true,
+      "target_token_overlap": []
+    },
+    {
+      "query": "automated boilerplate",
+      "intent": "Автоматично згенерувати методи класу",
+      "relevant": [
+        "library/dataclasses.txt"
+      ],
+      "paraphrase": true,
+      "target_token_overlap": []
+    },
+    {
+      "query": "hierarchical navigation",
+      "intent": "Працювати зі шляхами як об’єктами",
+      "relevant": [
+        "library/pathlib.txt"
+      ],
+      "paraphrase": true,
+      "target_token_overlap": []
+    },
+    {
+      "query": "disposal guardians",
+      "intent": "Гарантувати звільнення ресурсів",
+      "relevant": [
+        "library/contextlib.txt"
+      ],
+      "paraphrase": true,
+      "target_token_overlap": []
+    }
+  ]
+}

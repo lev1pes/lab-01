@@ -8,6 +8,10 @@ services:
     envVars:
       - key: INDEX_PATH
         value: /app/data/web-index.json
+      - key: EMBEDDINGS_PATH
+        value: /app/data/embeddings
+      - key: MODEL_CACHE
+        value: /app/model-cache
       - key: HOST
         value: 0.0.0.0
       - key: WORKERS

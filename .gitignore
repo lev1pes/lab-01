@@ -7,7 +7,10 @@ __pycache__/
 .ruff_cache/
 dist/
 *.egg-info/
-docs/
+docs/*
+!docs/profiles/
+!docs/media/
+!docs/measurements.md
 artifacts/
 index.bin
 index.json
@@ -18,3 +21,5 @@ htmlcov/
 .hypothesis/
 crawl.log
 .env
+
+.benchmarks/

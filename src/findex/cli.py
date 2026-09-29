@@ -28,7 +28,7 @@ from findex.crawler.urls import canonicalize
 from findex.index import build_index
 from findex.parallel import WorkerError, build_parallel, document_paths
 from findex.scoring import BM25, Scorer, TfIdf
-from findex.search import search as ranked_search
+from findex.semantic import MODEL, MiniLM, SemanticIndex, embed, retrieve
 from findex.store import open_index, save
 
 app = typer.Typer(
@@ -267,6 +267,11 @@ def search_command(
     scorer: Annotated[
         Literal["bm25", "tfidf"], typer.Option(help="Формула оцінки.")
     ] = "bm25",
+    mode: Annotated[
+        Literal["keyword", "semantic", "hybrid"], typer.Option()
+    ] = "keyword",
+    embeddings: Annotated[Path, typer.Option()] = Path("data/embeddings"),
+    model_cache: Annotated[Path | None, typer.Option()] = None,
     json_output: Annotated[
         bool, typer.Option("--json", help="JSON Lines: один результат на рядок.")
     ] = False,
@@ -275,7 +280,11 @@ def search_command(
     with operation(), open_index(index_path) as index:
         # Pyright перевіряє структурну сумісність обох класів із Protocol.
         algorithm: Scorer = BM25() if scorer == "bm25" else TfIdf()
-        results = ranked_search(index, query, algorithm, k)
+        semantic = SemanticIndex.load(embeddings, index) if mode != "keyword" else None
+        encoder = MiniLM(cache_dir=model_cache) if semantic else None
+        results = retrieve(
+            index, query, algorithm, k, mode=mode, semantic=semantic, encoder=encoder
+        )
         if json_output:
             for result in results:
                 print(
@@ -329,3 +338,22 @@ def stats_command(
         console = Console()
         console.print(summary)
         console.print(top)
+
+
+@app.command("embed")
+def embed_command(
+    index_path: Annotated[Path, typer.Argument()],
+    out: Annotated[Path, typer.Option()] = Path("data/embeddings"),
+    model: Annotated[str, typer.Option()] = MODEL,
+    model_cache: Annotated[Path | None, typer.Option()] = None,
+) -> None:
+    """Порахувати нормалізовані MiniLM-вектори фрагментів і зберегти .npy."""
+    with operation(trace_memory=False), open_index(index_path) as index:
+        encoder = MiniLM(model, model_cache)
+        with Progress(console=Console(stderr=True)) as progress:
+            task = progress.add_task("Ембеддинги", total=None)
+            semantic = embed(index, encoder, lambda n: progress.advance(task, n))
+        semantic.save(out)
+        Console().print(
+            f"Збережено {len(semantic.doc_ids)} фрагментів: {out}", markup=False
+        )

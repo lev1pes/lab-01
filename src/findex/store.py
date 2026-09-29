@@ -33,9 +33,15 @@ def file_format(path: Path, format: FileFormat | None) -> FileFormat:
 
 def validate(index: object) -> None:
     """Відсіяти несумісний або пошкоджений індекс; це не захист від pickle."""
-    if not isinstance(index, Index) or index.storage not in ("plain", "slots", "array"):
+    if not isinstance(index, Index) or index.storage not in (
+        "plain",
+        "slots",
+        "array",
+        "numpy",
+    ):
         raise ValueError("Непідтримувана структура індексу")
     # Поля довіреного pickle теж можуть бути пошкодженими: перевіряємо як object.
+    lengths = index.doc_lengths
     ids = set(index.doc_meta)
     if ids != set(index.doc_lengths) or ids != set(range(len(ids))):
         raise ValueError("Ідентифікатори документів мають бути послідовними від нуля")
@@ -82,8 +88,7 @@ def validate(index: object) -> None:
                 if (
                     len(positions) != posting.tf
                     or any(
-                        type(p) is not int
-                        or not 0 <= p < index.doc_length(posting.doc_id)
+                        type(p) is not int or not 0 <= p < lengths[posting.doc_id]
                         for p in positions
                     )
                     or any(a >= b for a, b in zip(positions, positions[1:]))
@@ -152,7 +157,7 @@ def _string(value: object) -> str:
 
 def from_json(data: dict[str, object]) -> Index:
     storage = data["storage"]
-    if storage not in ("plain", "slots", "array"):
+    if storage not in ("plain", "slots", "array", "numpy"):
         raise ValueError("Невідомий спосіб зберігання")
     lengths: dict[int, int] = {}
     metadata: dict[int, DocMeta] = {}

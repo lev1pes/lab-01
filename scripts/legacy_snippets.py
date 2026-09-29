@@ -1,24 +1,32 @@
 """Вікно вихідного тексту: найбільше різних термінів, потім входжень."""
 
+import unicodedata
 from collections import Counter
 from collections.abc import Iterator
-
-import regex
 
 from findex.tokenize import tokenize
 
 
 def matching_spans(text: str, terms: set[str]) -> Iterator[tuple[int, int, str]]:
-    # Ті самі категорії Unicode, але сканування виконує нативний regex.
-    for match in regex.finditer(r"[\p{L}\p{N}\p{M}'’ʼ‘]+", text):
-        begin, end = match.span()
-        while begin < end and text[begin] in "'’ʼ‘":
-            begin += 1
-        while end > begin and text[end - 1] in "'’ʼ‘":
-            end -= 1
-        words = tuple(tokenize(text[begin:end]))
-        if len(words) == 1 and words[0] in terms:
-            yield begin, end, words[0]
+    start = None
+    for i in range(len(text) + 1):
+        character = text[i] if i < len(text) else " "
+        accepted = character.isalnum() or unicodedata.category(character).startswith(
+            "M"
+        )
+        accepted = accepted or character in "'’ʼ‘"
+        if accepted and start is None:
+            start = i
+        if not accepted and start is not None:
+            begin, end = start, i
+            while begin < end and text[begin] in "'’ʼ‘":
+                begin += 1
+            while end > begin and text[end - 1] in "'’ʼ‘":
+                end -= 1
+            words = tuple(tokenize(text[begin:end]))
+            if len(words) == 1 and words[0] in terms:
+                yield begin, end, words[0]
+            start = None
 
 
 def snippet(text: str, terms: set[str], radius: int = 80) -> str:

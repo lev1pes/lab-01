@@ -37,7 +37,7 @@ jobs:
         if: matrix.python == '3.13t'
         run: |
           uv sync --locked --no-dev --python 3.13t
-          uv pip install pytest==9.1.1 pytest-cov==7.1.0 hypothesis==6.135.26
+          uv pip install pytest==9.1.1 pytest-cov==7.1.0 hypothesis==6.135.26 pytest-benchmark==5.3.0
       - name: Перевірка режиму GIL
         if: matrix.python == '3.13t'
         run: uv run --no-sync python -c "import sys, hypothesis; print(sys._is_gil_enabled()); assert not sys._is_gil_enabled()"
@@ -58,3 +58,23 @@ jobs:
           uv pip install --python "$RUNNER_TEMP/findex-smoke/bin/python" dist/*.whl
           cd "$RUNNER_TEMP"
           findex-smoke/bin/findex --help
+
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install uv==0.12.14
+      - run: uv sync --locked --python 3.12
+      - uses: actions/cache@v4
+        with:
+          path: .benchmarks
+          key: perf-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            perf-${{ runner.os }}-${{ github.ref_name }}-
+      - name: Search та build — поріг регресії медіани 50%
+        run: uv run pytest tests/test_performance_semantic.py -k benchmark --benchmark-only --benchmark-autosave --benchmark-compare --benchmark-compare-fail=median:50% --benchmark-min-rounds=20 --benchmark-json=benchmark.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance
+          path: benchmark.json

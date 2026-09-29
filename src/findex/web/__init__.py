@@ -21,6 +21,7 @@ from markupsafe import Markup, escape
 from findex.models import Index
 from findex.scoring import BM25, TfIdf
 from findex.search import search
+from findex.semantic import Encoder, MiniLM, SemanticIndex, retrieve
 from findex.store import load
 from findex.web.schemas import (
     DocumentOut,
@@ -54,6 +55,8 @@ templates.env.filters["highlight"] = highlight
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     app.state.index = None
+    app.state.semantic = None
+    app.state.encoder = None
     app.state.started = perf_counter()
     app.state.index_bytes = 0
     override = app.dependency_overrides.get(get_settings)
@@ -65,6 +68,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             app.state.index = index
             app.state.index_bytes = settings.index_path.stat().st_size
             logger.info("index_loaded documents=%d", index.num_docs)
+            if settings.embeddings_path is not None:
+                app.state.semantic = await asyncio.to_thread(
+                    SemanticIndex.load, settings.embeddings_path, index
+                )
+                app.state.encoder = await asyncio.to_thread(
+                    MiniLM, cache_dir=settings.model_cache
+                )
         except (OSError, ValueError):
             logger.exception("index_unavailable")
     try:
@@ -86,9 +96,38 @@ IndexDependency = Annotated[Index, Depends(get_index)]
 ParamsDependency = Annotated[SearchParams, Query()]
 
 
-def execute_search(index: Index, params: SearchParams) -> SearchResponse:
+def execute_search(
+    index: Index,
+    params: SearchParams,
+    semantic: SemanticIndex | None = None,
+    encoder: Encoder | None = None,
+) -> SearchResponse:
     started = perf_counter()
     try:
+        if params.mode != "keyword":
+            if semantic is None or encoder is None:
+                raise HTTPException(503, "Семантичний індекс ще не завантажено")
+            ranked_all = retrieve(
+                index,
+                params.q,
+                k=index.num_docs,
+                mode=params.mode,
+                semantic=semantic,
+                encoder=encoder,
+            )
+            total = len(ranked_all)
+            start = (params.page - 1) * params.k
+            return SearchResponse(
+                query=params.q,
+                total=total,
+                took_ms=round((perf_counter() - started) * 1000, 3),
+                page=params.page,
+                pages=math.ceil(total / params.k),
+                results=[
+                    ResultOut.model_validate(r)
+                    for r in ranked_all[start : start + params.k]
+                ],
+            )
         total = len(index.matched_ids(params.q))
         end = min(total, params.page * params.k)
         start = (params.page - 1) * params.k
@@ -123,7 +162,7 @@ def document(index: Index, doc_id: int) -> DocumentOut:
 
 
 def create_app() -> FastAPI:
-    application = FastAPI(title="findex", version="0.7.0", lifespan=lifespan)
+    application = FastAPI(title="findex", version="1.0.0", lifespan=lifespan)
     application.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 
     @application.middleware("http")
@@ -154,9 +193,14 @@ def create_app() -> FastAPI:
 
     @application.get("/search", response_model=SearchResponse)
     def search_route(
-        params: ParamsDependency, index: IndexDependency
+        request: Request, params: ParamsDependency, index: IndexDependency
     ) -> SearchResponse:
-        return execute_search(index, params)
+        return execute_search(
+            index,
+            params,
+            getattr(request.app.state, "semantic", None),
+            getattr(request.app.state, "encoder", None),
+        )
 
     @application.get("/docs/{doc_id}", response_model=DocumentOut)
     def doc_api(doc_id: int, index: IndexDependency) -> DocumentOut:
@@ -185,15 +229,21 @@ def create_app() -> FastAPI:
         k: Annotated[int, Query(ge=1, le=100)] = 10,
         scorer: Annotated[str, Query(pattern="^(bm25|tfidf)$")] = "bm25",
         page: Annotated[int, Query(ge=1, le=10000)] = 1,
+        mode: Annotated[str, Query(pattern="^(keyword|semantic|hybrid)$")] = "keyword",
     ) -> Response:
         result = None
         error = ""
         if q:
             try:
                 params = SearchParams.model_validate(
-                    {"q": q, "k": k, "scorer": scorer, "page": page}
+                    {"q": q, "k": k, "scorer": scorer, "page": page, "mode": mode}
                 )
-                result = execute_search(index, params)
+                result = execute_search(
+                    index,
+                    params,
+                    getattr(request.app.state, "semantic", None),
+                    getattr(request.app.state, "encoder", None),
+                )
             except (ValueError, HTTPException) as exc:
                 error = (
                     str(exc.detail)
@@ -202,7 +252,9 @@ def create_app() -> FastAPI:
                 )
 
         def link(number: int) -> str:
-            return "/?" + urlencode({"q": q, "k": k, "scorer": scorer, "page": number})
+            return "/?" + urlencode(
+                {"q": q, "k": k, "scorer": scorer, "page": number, "mode": mode}
+            )
 
         return templates.TemplateResponse(
             request,
@@ -210,6 +262,7 @@ def create_app() -> FastAPI:
             {
                 "q": q,
                 "scorer": scorer,
+                "mode": mode,
                 "k": k,
                 "result": result,
                 "error": error,

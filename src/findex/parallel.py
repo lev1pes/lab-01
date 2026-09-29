@@ -12,7 +12,15 @@ from typing import Literal
 
 from findex.corpus import Document
 from findex.index import build_state
-from findex.models import ArrayPostings, Index, IndexState, Storage
+from findex.models import (
+    ArrayPostings,
+    Index,
+    IndexState,
+    NumpyPostings,
+    Posting,
+    Storage,
+    pairs,
+)
 
 type ExecutorName = Literal["serial", "threads", "processes"]
 
@@ -47,7 +55,7 @@ def build_partial(
     doc_paths: Sequence[Path],
     root: Path,
     start_id: int = 0,
-    storage: Storage = "slots",
+    storage: Storage = "numpy",
     positions: bool = False,
 ) -> PartialIndex:
     """Функція рівня модуля; читання й усі змінні дані належать воркеру."""
@@ -101,7 +109,7 @@ def merge(partials: Iterable[PartialIndex]) -> Index:
                 state["postings"][term] = (
                     ArrayPostings(postings.doc_ids[:], postings.tfs[:])
                     if isinstance(postings, ArrayPostings)
-                    else list(postings)
+                    else [Posting(d, t) for d, t in pairs(postings)]
                 )
             else:
                 target = state["postings"][term]
@@ -110,8 +118,10 @@ def merge(partials: Iterable[PartialIndex]) -> Index:
                 ):
                     target.doc_ids.extend(postings.doc_ids)
                     target.tfs.extend(postings.tfs)
-                elif isinstance(target, list) and isinstance(postings, list):
-                    target.extend(postings)
+                elif isinstance(target, list) and isinstance(
+                    postings, (list, NumpyPostings)
+                ):
+                    target.extend(Posting(d, t) for d, t in pairs(postings))
                 else:
                     raise ValueError("Несумісні постінги")
         for term, docs in (incoming["positions"] or {}).items():
@@ -130,7 +140,7 @@ def build_parallel(
     *,
     workers: int = 1,
     executor: ExecutorName = "serial",
-    storage: Storage = "slots",
+    storage: Storage = "numpy",
     positions: bool = False,
     metrics: BuildMetrics | None = None,
     progress: Callable[[int], None] | None = None,

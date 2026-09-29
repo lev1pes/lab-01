@@ -10,6 +10,9 @@ from functools import cached_property, lru_cache
 from types import MappingProxyType
 from typing import Literal, NamedTuple, TypedDict, cast
 
+import numpy as np
+from numpy.typing import NDArray
+
 
 @dataclass(frozen=True, slots=True)
 class Posting:
@@ -40,8 +43,29 @@ class ArrayPostings:
         return len(self.doc_ids)
 
 
-type Storage = Literal["plain", "slots", "array"]
-type PostingList = list[Posting | PlainPosting] | ArrayPostings
+@dataclass(frozen=True, slots=True)
+class NumpyPostings:
+    doc_ids: NDArray[np.int32]
+    tfs: NDArray[np.int32]
+
+    def __len__(self) -> int:
+        return len(self.doc_ids)
+
+
+def compact(items: PostingList) -> NumpyPostings:
+    if isinstance(items, NumpyPostings):
+        return items
+    values = list(pairs(items))
+    if any(not 0 <= d <= 2**31 - 1 or not 0 < t <= 2**31 - 1 for d, t in values):
+        raise ValueError("Постінг не вміщується в int32")
+    ids = np.array([d for d, _ in values], dtype=np.int32)
+    tfs = np.array([t for _, t in values], dtype=np.int32)
+    ids.flags.writeable = tfs.flags.writeable = False
+    return NumpyPostings(ids, tfs)
+
+
+type Storage = Literal["plain", "slots", "array", "numpy"]
+type PostingList = list[Posting | PlainPosting] | ArrayPostings | NumpyPostings
 type Positions = dict[str, dict[int, tuple[int, ...]]]
 
 
@@ -69,11 +93,15 @@ class Index(Mapping[str, tuple[Posting, ...]]):
         postings: dict[str, PostingList],
         doc_lengths: dict[int, int],
         doc_meta: dict[int, DocMeta],
-        storage: Storage = "slots",
+        storage: Storage = "numpy",
         positions: Positions | None = None,
         texts: dict[int, str] | None = None,
     ) -> None:
-        self._postings = postings
+        self._postings: dict[str, PostingList] = (
+            {term: compact(items) for term, items in postings.items()}
+            if storage == "numpy"
+            else postings
+        )
         self._doc_lengths = doc_lengths
         self._doc_meta = doc_meta
         self.storage: Storage = storage
@@ -117,7 +145,14 @@ class Index(Mapping[str, tuple[Posting, ...]]):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Index):
             return NotImplemented
-        return self.__getstate__() == other.__getstate__()
+        return (
+            dict(self.items()) == dict(other.items())
+            and self.doc_lengths == other.doc_lengths
+            and self.doc_meta == other.doc_meta
+            and self._positions == other._positions
+            and self.texts == other.texts
+            and self.storage == other.storage
+        )
 
     @property
     def num_docs(self) -> int:
@@ -130,6 +165,21 @@ class Index(Mapping[str, tuple[Posting, ...]]):
 
     def doc_length(self, doc_id: int) -> int:
         return self.doc_lengths[doc_id]
+
+    @cached_property
+    def length_array(self) -> NDArray[np.int32]:
+        if any(not 0 <= n <= 2**31 - 1 for n in self._doc_lengths.values()):
+            raise ValueError("Довжина не вміщується в int32")
+        result = np.array(
+            [self._doc_lengths[i] for i in range(self.num_docs)], dtype=np.int32
+        )
+        result.flags.writeable = False
+        return result
+
+    @cached_property
+    def numpy_postings(self) -> dict[str, NumpyPostings]:
+        self._check_open()
+        return {term: compact(items) for term, items in self._postings.items()}
 
     def df(self, term: str) -> int:
         self._check_open()
@@ -199,6 +249,8 @@ class Index(Mapping[str, tuple[Posting, ...]]):
         if self._positions is not None:
             self._positions.clear()
         self.__dict__.pop("avg_doc_length", None)
+        self.__dict__.pop("length_array", None)
+        self.__dict__.pop("numpy_postings", None)
         self.closed = True
 
     def __getstate__(self) -> IndexState:
@@ -222,19 +274,20 @@ class Index(Mapping[str, tuple[Posting, ...]]):
 
 
 def pairs(
-    postings: Sequence[Posting | PlainPosting] | ArrayPostings,
+    postings: Sequence[Posting | PlainPosting] | ArrayPostings | NumpyPostings,
 ) -> Iterator[tuple[int, int]]:
     """Однаковий інтерфейс для об'єктів та компактних масивів."""
-    if isinstance(postings, ArrayPostings):
-        yield from zip(postings.doc_ids, postings.tfs, strict=True)
+    if isinstance(postings, (ArrayPostings, NumpyPostings)):
+        for doc, tf in zip(postings.doc_ids, postings.tfs, strict=True):
+            yield int(doc), int(tf)
     else:
         for posting in postings:
             yield posting.doc_id, posting.tf
 
 
 def document_ids(
-    postings: Sequence[Posting | PlainPosting] | ArrayPostings,
+    postings: Sequence[Posting | PlainPosting] | ArrayPostings | NumpyPostings,
 ) -> list[int]:
-    if isinstance(postings, ArrayPostings):
-        return list(postings.doc_ids)
+    if isinstance(postings, (ArrayPostings, NumpyPostings)):
+        return [int(doc) for doc in postings.doc_ids]
     return [posting.doc_id for posting in postings]

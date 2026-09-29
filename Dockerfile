@@ -4,16 +4,20 @@ WORKDIR /app
 ENV UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never
 COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
-RUN uv sync --locked --no-dev --no-editable
+RUN uv sync --locked --no-dev --no-editable --extra semantic
 COPY scripts/download_corpus.py ./scripts/download_corpus.py
 RUN .venv/bin/python scripts/download_corpus.py && \
-    .venv/bin/findex index data/python-docs --out data/web-index.json --positions --executor serial --workers 1
+    .venv/bin/findex index data/python-docs --out data/web-index.json --positions --executor serial --workers 1 && \
+    .venv/bin/findex embed data/web-index.json --out data/embeddings --model-cache /app/model-cache
 
 FROM python:3.12-slim-bookworm AS runtime
 RUN groupadd --gid 10001 findex && useradd --uid 10001 --gid findex --create-home findex
 WORKDIR /app
 COPY --from=builder --chown=findex:findex /app/.venv /app/.venv
 COPY --from=builder --chown=findex:findex /app/data/web-index.json /app/data/web-index.json
+COPY --from=builder --chown=findex:findex /app/data/embeddings /app/data/embeddings
+COPY --from=builder --chown=findex:findex /app/model-cache /app/model-cache
+ENV EMBEDDINGS_PATH=/app/data/embeddings MODEL_CACHE=/app/model-cache HF_HUB_OFFLINE=1
 ENV PATH="/app/.venv/bin:$PATH" INDEX_PATH=/app/data/web-index.json HOST=0.0.0.0 PORT=8000 WORKERS=1 PYTHONUNBUFFERED=1
 USER findex
 EXPOSE 8000
