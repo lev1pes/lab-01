@@ -8,6 +8,7 @@ import json
 from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
+from threading import Lock
 from typing import Literal, Protocol, cast
 
 import numpy as np
@@ -47,13 +48,18 @@ class MiniLM:
             ) from None
         factory = cast(Callable[..., EmbeddingBackend], module.TextEmbedding)
         self.backend = factory(
-            model_name=model, cache_dir=str(cache_dir) if cache_dir else None, threads=1
+            model_name=model,
+            cache_dir=str(cache_dir) if cache_dir else None,
+            threads=1,
+            enable_cpu_mem_arena=False,
         )
+        self.lock = Lock()
 
     def encode(self, texts: list[str]) -> NDArray[np.float32]:
-        return np.asarray(
-            list(self.backend.embed(texts, batch_size=16)), dtype=np.float32
-        )
+        with self.lock:
+            return np.asarray(
+                list(self.backend.embed(texts, batch_size=16)), dtype=np.float32
+            )
 
 
 def chunks(text: str, size: int = 160, overlap: int = 32) -> Iterator[str]:
