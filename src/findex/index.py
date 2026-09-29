@@ -72,7 +72,7 @@ def build_state(
         texts[doc_id] = document.text
         lengths[doc_id] = counts.total()
         # Назва файла зрозуміліша за перший рядок розмітки документації.
-        title = document.path.stem.replace("_", " ")
+        title = document.title or document.path.stem.replace("_", " ")
         metadata[doc_id] = DocMeta(document.doc_id, title)
         for term, tf in counts.items():
             items = postings[term]

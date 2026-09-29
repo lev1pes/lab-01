@@ -1,0 +1,155 @@
+{
+  "python": "3.12.5 (tags/v3.12.5:ff3bc82, Aug  6 2024, 20:45:27) [MSC v.1940 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "seed": "http://127.0.0.1:8766/",
+  "max_pages": 200,
+  "per_host": 5,
+  "delay": 0.005,
+  "server_latency": 0.08,
+  "repeat_count": 3,
+  "rows": [
+    {
+      "concurrency": 1,
+      "pages": 200,
+      "wall": 22.24098200001754,
+      "pages_per_second": 8.99240869849372,
+      "errors": 1,
+      "peak_rss_mib": 40.2890625,
+      "requests": 202,
+      "wall_min": 22.237186399986967,
+      "wall_max": 23.104941199999303
+    },
+    {
+      "concurrency": 5,
+      "pages": 200,
+      "wall": 6.526643199962564,
+      "pages_per_second": 30.64362396907911,
+      "errors": 1,
+      "peak_rss_mib": 41.41796875,
+      "requests": 202,
+      "wall_min": 6.4893854999681935,
+      "wall_max": 6.566452500061132
+    },
+    {
+      "concurrency": 20,
+      "pages": 200,
+      "wall": 6.886233099969104,
+      "pages_per_second": 29.043454831771136,
+      "errors": 1,
+      "peak_rss_mib": 42.85546875,
+      "requests": 202,
+      "wall_min": 6.838316899957135,
+      "wall_max": 7.481889400049113
+    }
+  ],
+  "runs": [
+    {
+      "concurrency": 1,
+      "pages": 200,
+      "wall": 22.237186399986967,
+      "pages_per_second": 8.993943586321569,
+      "errors": 1,
+      "peak_rss_mib": 40.29296875,
+      "requests": 202,
+      "debug": true,
+      "content_sha256": "364656ea6eab243218f1a44114f9ea2dde690357f79380d9b9ce180b417a93f4",
+      "repeat": 0
+    },
+    {
+      "concurrency": 5,
+      "pages": 200,
+      "wall": 6.526643199962564,
+      "pages_per_second": 30.64362396907911,
+      "errors": 1,
+      "peak_rss_mib": 41.25,
+      "requests": 202,
+      "debug": true,
+      "content_sha256": "364656ea6eab243218f1a44114f9ea2dde690357f79380d9b9ce180b417a93f4",
+      "repeat": 0
+    },
+    {
+      "concurrency": 20,
+      "pages": 200,
+      "wall": 6.838316899957135,
+      "pages_per_second": 29.24696280180488,
+      "errors": 1,
+      "peak_rss_mib": 43.0625,
+      "requests": 202,
+      "debug": true,
+      "content_sha256": "364656ea6eab243218f1a44114f9ea2dde690357f79380d9b9ce180b417a93f4",
+      "repeat": 0
+    },
+    {
+      "concurrency": 20,
+      "pages": 200,
+      "wall": 6.886233099969104,
+      "pages_per_second": 29.043454831771136,
+      "errors": 1,
+      "peak_rss_mib": 42.85546875,
+      "requests": 202,
+      "debug": true,
+      "content_sha256": "364656ea6eab243218f1a44114f9ea2dde690357f79380d9b9ce180b417a93f4",
+      "repeat": 1
+    },
+    {
+      "concurrency": 1,
+      "pages": 200,
+      "wall": 22.24098200001754,
+      "pages_per_second": 8.99240869849372,
+      "errors": 1,
+      "peak_rss_mib": 40.2890625,
+      "requests": 202,
+      "debug": true,
+      "content_sha256": "364656ea6eab243218f1a44114f9ea2dde690357f79380d9b9ce180b417a93f4",
+      "repeat": 1
+    },
+    {
+      "concurrency": 5,
+      "pages": 200,
+      "wall": 6.4893854999681935,
+      "pages_per_second": 30.81955910940724,
+      "errors": 1,
+      "peak_rss_mib": 41.44140625,
+      "requests": 202,
+      "debug": true,
+      "content_sha256": "364656ea6eab243218f1a44114f9ea2dde690357f79380d9b9ce180b417a93f4",
+      "repeat": 1
+    },
+    {
+      "concurrency": 5,
+      "pages": 200,
+      "wall": 6.566452500061132,
+      "pages_per_second": 30.457846150282524,
+      "errors": 1,
+      "peak_rss_mib": 41.41796875,
+      "requests": 202,
+      "debug": true,
+      "content_sha256": "364656ea6eab243218f1a44114f9ea2dde690357f79380d9b9ce180b417a93f4",
+      "repeat": 2
+    },
+    {
+      "concurrency": 20,
+      "pages": 200,
+      "wall": 7.481889400049113,
+      "pages_per_second": 26.731215780694,
+      "errors": 1,
+      "peak_rss_mib": 42.78515625,
+      "requests": 202,
+      "debug": true,
+      "content_sha256": "364656ea6eab243218f1a44114f9ea2dde690357f79380d9b9ce180b417a93f4",
+      "repeat": 2
+    },
+    {
+      "concurrency": 1,
+      "pages": 200,
+      "wall": 23.104941199999303,
+      "pages_per_second": 8.656157064792964,
+      "errors": 1,
+      "peak_rss_mib": 40.19140625,
+      "requests": 202,
+      "debug": true,
+      "content_sha256": "364656ea6eab243218f1a44114f9ea2dde690357f79380d9b9ce180b417a93f4",
+      "repeat": 2
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 """Встановлювана команда: дані у stdout, журнал і прогрес у stderr."""
 
+import asyncio
 import json
 import logging
 import re
@@ -8,16 +9,23 @@ import tracemalloc
 from collections import Counter
 from collections.abc import Generator
 from contextlib import contextmanager
+from itertools import islice
 from pathlib import Path
 from time import perf_counter
 from typing import Annotated, Literal
 
 import typer
 from rich.console import Console
+from rich.live import Live
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from rich.text import Text
 
+from findex.corpus import iter_documents
+from findex.crawler.fetch import CrawlStats
+from findex.crawler.output import collect, crawl_log
+from findex.crawler.urls import canonicalize
+from findex.index import build_index
 from findex.parallel import WorkerError, build_parallel, document_paths
 from findex.scoring import BM25, Scorer, TfIdf
 from findex.search import search as ranked_search
@@ -97,7 +105,7 @@ def operation(trace_memory: bool = True) -> Generator[None, None, None]:
 
 @app.command("index")
 def index_command(
-    corpus: Annotated[Path, typer.Argument(help="Каталог з файлами .txt.")],
+    corpus: Annotated[Path, typer.Argument(help="Каталог .txt або файл crawl.jsonl.")],
     out: Annotated[
         Path, typer.Option("--out", help="Файл індексу; .json обирає JSON.")
     ],
@@ -109,17 +117,20 @@ def index_command(
     ] = None,
     workers: Annotated[int, typer.Option(min=1, help="Кількість воркерів.")] = 4,
     executor: Annotated[
-        Literal["serial", "threads", "processes"],
-        typer.Option(help="Спосіб виконання часткової індексації."),
-    ] = "processes",
+        Literal["serial", "threads", "processes"] | None,
+        typer.Option(help="Для .txt: processes; для JSONL: serial."),
+    ] = None,
 ) -> None:
     """Побудувати та зберегти інвертований індекс."""
     # Tracemalloc лише в батьку несправедливо сповільнював би serial/threads.
     # RSS усіх конфігурацій окремо міряє benchmark_concurrency.py.
     with operation(trace_memory=False):
-        if not corpus.is_dir():
+        jsonl = corpus.is_file() and corpus.suffix == ".jsonl"
+        if not corpus.is_dir() and not jsonl:
             raise ValueError(f"Каталог корпусу не знайдено: {corpus}")
-        paths = document_paths(corpus, limit)
+        if jsonl and executor not in (None, "serial"):
+            raise ValueError("Потоковий JSONL підтримує --executor serial")
+        paths = [] if jsonl else document_paths(corpus, limit)
         with Progress(
             SpinnerColumn(),
             BarColumn(),
@@ -127,15 +138,23 @@ def index_command(
             console=Console(stderr=True),
             transient=False,
         ) as progress:
-            task = progress.add_task("Індексація", total=len(paths))
-            index = build_parallel(
-                paths,
-                corpus,
-                workers=workers,
-                executor=executor,
-                positions=positions,
-                progress=lambda n: progress.advance(task, n),
-            )
+            task = progress.add_task("Індексація", total=None if jsonl else len(paths))
+            if jsonl:
+                documents = iter_documents(corpus)
+                try:
+                    index = build_index(islice(documents, limit), positions=positions)
+                finally:
+                    documents.close()
+                progress.update(task, completed=index.num_docs)
+            else:
+                index = build_parallel(
+                    paths,
+                    corpus,
+                    workers=workers,
+                    executor=executor or "processes",
+                    positions=positions,
+                    progress=lambda n: progress.advance(task, n),
+                )
         try:
             save(index, out)
             Console().print(
@@ -145,6 +164,69 @@ def index_command(
             )
         finally:
             index.close()
+
+
+def crawl_table(stats: CrawlStats) -> Table:
+    table = Table("Сторінок", "Стор./с", "Запитів у польоті", "Помилок", "Черга")
+    table.add_row(
+        str(stats.pages),
+        f"{stats.rate:.2f}",
+        str(stats.in_flight),
+        str(stats.errors),
+        str(stats.queued),
+    )
+    return table
+
+
+@app.command("crawl")
+def crawl_command(
+    seed: Annotated[
+        str, typer.Argument(help="Початкова HTTP(S)-адреса дозволеного сайту.")
+    ],
+    out: Annotated[Path, typer.Option(help="Потоковий JSONL.")] = Path(
+        "data/crawl.jsonl"
+    ),
+    max_pages: Annotated[int, typer.Option(min=0)] = 500,
+    concurrency: Annotated[int, typer.Option(min=1)] = 10,
+    per_host: Annotated[int, typer.Option(min=1)] = 2,
+    delay: Annotated[
+        float, typer.Option(min=0, help="Пауза між стартами на хості.")
+    ] = 0.2,
+    timeout: Annotated[float, typer.Option(min=0.001)] = 10.0,
+    log_path: Annotated[Path, typer.Option("--log", help="Статус кожного URL.")] = Path(
+        "crawl.log"
+    ),
+    debug: Annotated[bool, typer.Option(help="Діагностика asyncio.")] = False,
+) -> None:
+    """Зібрати сторінки цього домену; індексація запускається окремою командою."""
+    with operation(trace_memory=False):
+        seed = canonicalize(seed)
+        if out.resolve() == log_path.resolve():
+            raise ValueError("JSONL і журнал мають бути різними файлами")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        stats = CrawlStats()
+        with crawl_log(log_path), out.open("w", encoding="utf-8") as target:
+            with Live(
+                crawl_table(stats), console=Console(stderr=True), auto_refresh=False
+            ) as live:
+                asyncio.run(
+                    collect(
+                        seed,
+                        target,
+                        stats=stats,
+                        max_pages=max_pages,
+                        concurrency=concurrency,
+                        per_host=per_host,
+                        delay=delay,
+                        timeout=timeout,
+                        update=lambda state: live.update(
+                            crawl_table(state), refresh=True
+                        ),
+                    ),
+                    debug=debug,
+                )
+        Console().print(f"Збережено {stats.pages} сторінок: {out}", markup=False)
 
 
 def highlighted(text: str) -> Text:

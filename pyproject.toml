@@ -1,6 +1,6 @@
 [project]
 name = "findex"
-version = "0.5.0"
+version = "0.6.0"
 description = "findex: інвертований індекс і ранжований пошук з командного рядка"
 readme = "README.md"
 authors = [
@@ -8,6 +8,8 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "anyio>=4.0",
+    "httpx>=0.28.1",
     "rich>=15.0.0",
     "typer>=0.27.2",
 ]

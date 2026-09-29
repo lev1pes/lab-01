@@ -16,3 +16,4 @@ coverage.json
 coverage.xml
 htmlcov/
 .hypothesis/
+crawl.log
