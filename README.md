@@ -1,25 +1,93 @@
 # findex — лабораторні роботи 1–7
 
-## Лабораторна 7: вебпошук (підготовка розгортання)
+**Публічний пошук: [findex-lab07.onrender.com](https://findex-lab07.onrender.com/)** · [API](https://findex-lab07.onrender.com/docs) · [Health](https://findex-lab07.onrender.com/health)
 
-Версія 0.7.0. FastAPI API: `/search`, `/docs/{doc_id}`, `/stats`, `/health`;
-сторінка пошуку `/`, перегляд документа `/doc/{doc_id}`, OpenAPI `/docs`.
-Публічну адресу й остаточну таблицю вимірів буде додано після перевірки Render.
+[![CI](https://github.com/lev1pes/lab-01/actions/workflows/ci.yml/badge.svg)](https://github.com/lev1pes/lab-01/actions/workflows/ci.yml)
+
+## Лабораторна 7: FastAPI та пошук у вебі
+
+Версія **0.7.0**, тег **lab-07**. Той самий індекс 503 документів CPython 3.12.10, 28 916 термінів; позиції й тексти збережено. API та Jinja2 використовують пошук лабораторної 3, dataclass-и залишаються всередині проєкту.
+
+### Запуск
 
 ```powershell
 uv sync --locked
+# Якщо data/python-docs ще немає: uv run python scripts/download_corpus.py
 uv run findex index data/python-docs --out data/web-index.json --positions --executor serial
 $env:INDEX_PATH = 'data/web-index.json'
 uv run findex serve --port 8000 --workers 1
 ```
 
-Docker використовує uv.lock, два етапи збірки й користувача `findex` без root.
-Індекс документації Python будується під час збірки; конфігурація сервісу —
-`INDEX_PATH`, `HOST`, `PORT`, `WORKERS`. `render.yaml` задає free-план та `/health`.
-Локального Docker на машині немає: контейнер перевіряється окремим job у CI.
-Тег `lab-07` буде створено після перевірки публічного сервісу.
+Відкрити `http://127.0.0.1:8000/`. Налаштування `INDEX_PATH`, `HOST`, `PORT`, `WORKERS` читаються через pydantic-settings, також підтримується локальний `.env` (у gitignore). CLI може перевизначити порт і кількість воркерів. Дефолт HOST локально — `127.0.0.1`, у контейнері — `0.0.0.0`.
 
-[![CI](https://github.com/lev1pes/lab-01/actions/workflows/ci.yml/badge.svg)](https://github.com/lev1pes/lab-01/actions/workflows/ci.yml)
+### API, життєвий цикл і межа даних
+
+| Маршрут | Результат |
+|---|---|
+| `GET /search?q=python&k=10&scorer=bm25&page=1` | query, total, took_ms, page, pages, results |
+| `GET /docs/{doc_id}` | doc_id, title, path, text; 404 для невідомого ID |
+| `GET /stats` | документи, словник, токени, байти файла індексу, uptime |
+| `GET /health` | `{"status":"ok"}`; 503, коли індекс не завантажений |
+| `GET /docs` | автоматична документація OpenAPI |
+| `GET /`, `GET /doc/{doc_id}` | HTML-пошук і перегляд документа |
+
+`q`: непорожній рядок до 300 символів; `k`: розмір сторінки 1–100; scorer: bm25 або tfidf; page: 1–10000. Неправильні типи, межі й синтаксис запиту дають 422. total — повна кількість збігів до пагінації; вихід за останню сторінку дає порожній results. Сортування стабільне, тому сторінки не дублюють результати.
+
+`lifespan` один раз на **процес** завантажує індекс із Settings.index_path і закриває його на завершенні. Чотири workers мають чотири копії індексу в пам'яті. Якщо файл недоступний, сервіс відповідає 503, а причина залишається в серверному журналі. `Depends(get_index)` і `Depends(get_settings)` дозволяють підмінити залежності в тестах без реального файла.
+
+Pydantic перевіряє запит і відповідь; BM25, TF-IDF та внутрішній SearchResult не переписані на Pydantic. Неочікувана помилка записується з traceback і згенерованим request_id; клієнт отримує лише 500, detail і request_id. Заголовок `X-Request-ID` також присутній у звичайних відповідях. Вміст документів і запитів екранується; підсвітка додає лише власний `<mark>` після escape, текст не виконується як HTML.
+
+### def проти async def: 20 одночасних запитів
+
+Окремий дослід після прогріву `/search?q=python`, однаковий індекс, HTTP через loopback:
+
+| Маршрут, 1 worker | Час 20 запитів, с | Найбільша затримка таймера event loop, мс |
+|---|---:|---:|
+| `async def`, пошук прямо в корутині | 2.758 | 266.7 |
+| `def`, пошук у пулі потоків | 2.664 | 365.3 |
+
+У застосунку залишено **звичайний def**: FastAPI виконує його в thread pool, а не безпосередньо в event loop. Проте це не прибирає GIL: виміряна максимальна затримка таймера у def навіть більша. Отже, не можна стверджувати, що пул гарантує мінімальну затримку під CPU-навантаженням; він прибирає пряме виконання пошукового циклу в корутині. Навмисно блокувальна версія існує лише в `scripts/bench_web_app.py` для відтворення, а не як прапорець публічного сервісу. Таймер з інтервалом 10 мс оцінює lag як фактичний інтервал мінус 10 мс; це допоміжний показник, не p99.
+
+### oha: локально й на Render
+
+oha **1.16.0**, той самий `/search?q=python&k=10&page=1&scorer=bm25`. Локально Windows, CPython 3.12.5, Intel i5-9400F (6 ядер), concurrency 50; Render Free у Frankfurt, один процес, concurrency 20. Кожний рядок — один реальний запуск, не медіана повторів. Задано `-z 10s -w`: після десяти секунд нові запити не стартують, але вже розпочаті дочікуються завершення. Тому фактичний час і знаменник RPS можуть бути більшими за 10 с. Усі відповіді — HTTP 200.
+
+| Режим | Concurrency | RPS | p50, мс | p95, мс | p99, мс | Відповідей |
+|---|---:|---:|---:|---:|---:|---:|
+| Локально: 1 worker, async def | 50 | 7.54 | 4735.0 | 15118.8 | 15519.8 | 117 |
+| Локально: 1 worker, def | 50 | 7.92 | 5596.0 | 12746.6 | 13734.9 | 109 |
+| Локально: 4 workers, def | 50 | 32.36 | 1420.8 | 2362.4 | 3142.9 | 361 |
+| Render Free: 1 worker, def | 20 | 0.95 | 21095.5 | 21103.0 | 21103.0 | 20 |
+
+Сирі JSON і серверні журнали: [benchmarks/lab07](benchmarks/lab07). `burst.json` містить окремі 20-запитні виміри. На Render у короткому вікні встигли розпочатися лише 20 запитів, тому p95/p99 — груба оцінка хвоста цієї маленької вибірки. Це не характеристика сервісу під тривалим production-навантаженням. Рядок Render містить ще мережу, TLS і обмеження спільної безкоштовної машини; називати всю різницю ефектом Python було б неправильно.
+
+```powershell
+uv run python scripts/benchmark_web.py --oha /path/to/oha.exe --index data/web-index.json
+oha -z 10s -c 20 -w --output-format json -o deployed-oha.json 'https://findex-lab07.onrender.com/search?q=python&k=10&page=1&scorer=bm25'
+```
+
+Пул потоків трохи покращив RPS одного worker, але не дав багатоядерного CPU-паралелізму: це той самий GIL із лабораторної 5. Чотири процеси підняли пропускну здатність приблизно вчетверо, ціною окремих інтерпретаторів та копій індексу. З лабораторною 6 спільне правило — не виконувати довгий синхронний цикл усередині async def. Asyncio добре перекриває мережеве очікування, але не прискорює обчислення BM25. На слабкому сервері багато одночасних запитів створюють чергу і збільшують хвостову затримку; це видно в рядку Render.
+
+### Docker і Render
+
+Dockerfile має два етапи: builder із uv 0.12.14 встановлює залежності **за uv.lock** і будує індекс з перевіреного SHA-256 архіву документації; slim runtime отримує готове оточення та JSON-індекс. Процес працює користувачем `findex`, UID 10001, без root. Завантаження корпусу відбувається під час build, не на кожний HTTP-запит.
+
+```bash
+docker build -t findex:0.7.0 .
+docker run --rm -p 8000:8000 -e INDEX_PATH=/app/data/web-index.json findex:0.7.0
+```
+
+На цій Windows-машині Docker не встановлений. Збірку й запуск контейнера з INDEX_PATH, non-root та реальні HTTP-запити перевірено **на Linux runner GitHub Actions**, а також самим Docker-деплоєм Render. Локальний `docker run` не видається за виконану перевірку.
+
+Render: free-план, Frankfurt, `/health` налаштовано як health check. Конфігурація описана в `render.yaml`, секретів у репозиторії немає. Робочі журнали доступні в [панелі сервісу](https://dashboard.render.com/web/srv-datvi9893c1s73c5song) власнику акаунта; перевірено записи HTTP і request_id через Render API. Публічна сторінка не потребує входу в Render. На free-плані після простою можливий холодний старт — перед захистом відкрийте сторінку завчасно. Автодеплой для створеного сервісу вимкнено: оновлення запускається явно після перевірок.
+
+### Перевірки
+
+**332 тести**, покриття з гілками **94.62%**, pyright strict без помилок, Ruff/format проходять. CI перевіряє Python 3.12 і 3.13t та Docker. TestClient підставляє індекс через dependency_overrides: пошук і пагінація, 422, 404, 503, прихований 500 з request_id, lifespan, env-конфіг, CLI serve, HTML-екранування. Старі тести лабораторних 1–6 залишено.
+
+Публічний UI додатково перевірено Chromium headless: надсилання форми, результати й mark, відкриття документа, екран 390 px без горизонтального переповнення. Поза coverage пакета: браузерний рендеринг, Docker/Render та самі генератори навантаження — вони перевіряються окремими інтеграційними запусками.
+
+Умови: [лабораторна 7](https://github.com/rmalkevy/Programming-Practice-Projects/blob/main/courses/python/lab-07-fastapi-web-search.md), [нотатки](https://github.com/rmalkevy/Programming-Practice-Projects/blob/main/courses/python/lab-07-fastapi-web-search.notes.md). Довідка: [FastAPI def/async](https://fastapi.tiangolo.com/async/), [uv Docker](https://docs.astral.sh/uv/guides/integration/docker/), [Render FastAPI](https://render.com/docs/deploy-fastapi).
 
 ## Лабораторна 6: асинхронний краулер
 

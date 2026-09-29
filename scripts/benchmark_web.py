@@ -7,9 +7,11 @@ import os
 import subprocess
 import sys
 import time
+from contextlib import suppress
 from pathlib import Path
 
 import httpx
+import psutil
 
 
 async def burst(url):
@@ -106,14 +108,13 @@ def main():
                 records.append({"mode": mode, "workers": workers, "burst": measured})
                 print(name, measured, flush=True)
             finally:
-                # Windows: зупинити тільки дерево створеного процесу uvicorn.
-                if os.name == "nt":
-                    subprocess.run(
-                        ["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                        capture_output=True,
-                    )
-                else:
-                    process.terminate()
+                # Лише дочірнє дерево цього Popen, включно з venv launcher Windows.
+                parent = psutil.Process(process.pid)
+                children = parent.children(recursive=True)
+                for child in reversed(children):
+                    with suppress(psutil.NoSuchProcess):
+                        child.kill()
+                process.kill()
                 process.wait(timeout=30)
     (dest / "burst.json").write_text(json.dumps(records, indent=2), encoding="utf-8")
 

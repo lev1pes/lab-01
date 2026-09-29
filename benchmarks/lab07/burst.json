@@ -1,0 +1,25 @@
+[
+  {
+    "mode": "async",
+    "workers": 1,
+    "burst": {
+      "requests": 20,
+      "wall_seconds": 2.7578166000312194,
+      "max_loop_lag_ms": 266.65549993980676
+    }
+  },
+  {
+    "mode": "sync",
+    "workers": 1,
+    "burst": {
+      "requests": 20,
+      "wall_seconds": 2.663622400024906,
+      "max_loop_lag_ms": 365.26560004334897
+    }
+  },
+  {
+    "mode": "sync",
+    "workers": 4,
+    "burst": null
+  }
+]
