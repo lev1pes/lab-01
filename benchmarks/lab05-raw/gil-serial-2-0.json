@@ -1,0 +1,17 @@
+{
+  "python": "3.12.5 (tags/v3.12.5:ff3bc82, Aug  6 2024, 20:45:27) [MSC v.1940 64 bit (AMD64)]",
+  "gil_enabled": true,
+  "executor": "serial",
+  "workers": 2,
+  "wall": 10.641425500041805,
+  "cpu": 5.625,
+  "parent_cpu": 5.625,
+  "child_cpu": 0.0,
+  "peak_rss_mib": 167.9140625,
+  "merge": 0.17568610003218055,
+  "chunks": 2,
+  "documents": 503,
+  "tokens": 1557525,
+  "sha256": "9604e84d8e7a5d956d6c8000da08544cceafd412700b172348102656adeec4e2",
+  "child_processes": 0
+}

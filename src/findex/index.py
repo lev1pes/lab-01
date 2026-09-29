@@ -14,6 +14,7 @@ from findex.models import (
     ArrayPostings,
     DocMeta,
     Index,
+    IndexState,
     PlainPosting,
     Posting,
     PostingList,
@@ -32,6 +33,16 @@ def build_index(
     *,
     positions: bool = False,
 ) -> Index:
+    return Index(**build_state(documents, storage, positions=positions))
+
+
+def build_state(
+    documents: Iterable[Document],
+    storage: Storage = "slots",
+    *,
+    positions: bool = False,
+    start_id: int = 0,
+) -> IndexState:
     """Номер документа зростає, тому постінги одразу відсортовані."""
     if storage not in STORAGES:
         raise ValueError(f"Невідоме зберігання: {storage}")
@@ -47,7 +58,7 @@ def build_index(
         defaultdict(dict) if positions else None
     )
     texts: dict[int, str] = {}
-    for doc_id, document in enumerate(documents):
+    for doc_id, document in enumerate(documents, start_id):
         if offsets is not None:
             local_positions: defaultdict[str, list[int]] = defaultdict(list)
             counts: Counter[str] = Counter()
@@ -70,13 +81,13 @@ def build_index(
                 items.tfs.append(tf)
             else:
                 items.append(record(doc_id, tf))
-    return Index(
-        dict(postings),
-        lengths,
-        metadata,
-        storage,
-        dict(offsets) if offsets is not None else None,
-        texts,
+    return IndexState(
+        postings=dict(postings),
+        doc_lengths=lengths,
+        doc_meta=metadata,
+        storage=storage,
+        positions=dict(offsets) if offsets is not None else None,
+        texts=texts,
     )
 
 

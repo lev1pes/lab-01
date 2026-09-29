@@ -1,0 +1,13 @@
+{
+  "paths_and_options": {
+    "bytes": 15641,
+    "dumps_seconds": 0.00043860008008778095,
+    "loads_seconds": 0.0007946999976411462
+  },
+  "partial_result": {
+    "bytes": 22029591,
+    "dumps_seconds": 1.3809744999743998,
+    "loads_seconds": 1.134962399955839
+  },
+  "repeats": 3
+}

@@ -8,7 +8,6 @@ import tracemalloc
 from collections import Counter
 from collections.abc import Generator
 from contextlib import contextmanager
-from itertools import islice
 from pathlib import Path
 from time import perf_counter
 from typing import Annotated, Literal
@@ -19,8 +18,7 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from rich.text import Text
 
-from findex.corpus import Document, iter_documents
-from findex.index import build_index
+from findex.parallel import WorkerError, build_parallel, document_paths
 from findex.scoring import BM25, Scorer, TfIdf
 from findex.search import search as ranked_search
 from findex.store import open_index, save
@@ -67,12 +65,16 @@ def options(
 
 
 @contextmanager
-def operation() -> Generator[None, None, None]:
+def operation(trace_memory: bool = True) -> Generator[None, None, None]:
     """Спільна межа очікуваних помилок і вимірювання ресурсів CLI."""
     started = perf_counter()
-    tracemalloc.start()
+    if trace_memory:
+        tracemalloc.start()
     try:
         yield
+    except WorkerError:
+        log.exception("Помилка воркера; індекс не збережено")
+        raise typer.Exit(code=1) from None
     except (OSError, ValueError, OverflowError) as error:
         if isinstance(error, FileNotFoundError):
             message = f"Файл або каталог не знайдено: {error.filename}"
@@ -81,13 +83,16 @@ def operation() -> Generator[None, None, None]:
         log.error("Помилка: %s", message)
         raise typer.Exit(code=1) from None
     finally:
-        _, peak = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
-        log.info(
-            "Час: %.3f с; пікова пам'ять: %.3f МіБ",
-            perf_counter() - started,
-            peak / 1024**2,
-        )
+        if trace_memory:
+            _, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            log.info(
+                "Час: %.3f с; пікова пам'ять: %.3f МіБ",
+                perf_counter() - started,
+                peak / 1024**2,
+            )
+        else:
+            log.info("Час: %.3f с", perf_counter() - started)
 
 
 @app.command("index")
@@ -102,14 +107,19 @@ def index_command(
     limit: Annotated[
         int | None, typer.Option(min=0, help="Обмежити кількість документів.")
     ] = None,
+    workers: Annotated[int, typer.Option(min=1, help="Кількість воркерів.")] = 4,
+    executor: Annotated[
+        Literal["serial", "threads", "processes"],
+        typer.Option(help="Спосіб виконання часткової індексації."),
+    ] = "processes",
 ) -> None:
     """Побудувати та зберегти інвертований індекс."""
-    with operation():
+    # Tracemalloc лише в батьку несправедливо сповільнював би serial/threads.
+    # RSS усіх конфігурацій окремо міряє benchmark_concurrency.py.
+    with operation(trace_memory=False):
         if not corpus.is_dir():
             raise ValueError(f"Каталог корпусу не знайдено: {corpus}")
-        documents = iter_documents(corpus)
-        source = islice(documents, limit) if limit is not None else documents
-        # Невідомий розмір потоку: індикатор і лічильник без другого проходу.
+        paths = document_paths(corpus, limit)
         with Progress(
             SpinnerColumn(),
             BarColumn(),
@@ -117,14 +127,15 @@ def index_command(
             console=Console(stderr=True),
             transient=False,
         ) as progress:
-            task = progress.add_task("Індексація", total=None)
-
-            def tracked() -> Generator[Document, None, None]:
-                for document in source:
-                    yield document
-                    progress.advance(task)
-
-            index = build_index(tracked(), positions=positions)
+            task = progress.add_task("Індексація", total=len(paths))
+            index = build_parallel(
+                paths,
+                corpus,
+                workers=workers,
+                executor=executor,
+                positions=positions,
+                progress=lambda n: progress.advance(task, n),
+            )
         try:
             save(index, out)
             Console().print(

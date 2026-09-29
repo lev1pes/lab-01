@@ -20,7 +20,7 @@ from findex.models import (
 )
 from findex.timing import timed
 
-VERSION = 2
+VERSION = 3
 type FileFormat = Literal["pickle", "json"]
 
 
@@ -93,25 +93,32 @@ def validate(index: object) -> None:
 
 def save(index: Index, path: Path, format: FileFormat | None = None) -> None:
     selected = file_format(path, format)
+    # Канонічний текст усуває залежність pickle від тотожності об'єктів,
+    # яка змінюється після передачі partial через інший процес.
+    payload = json.dumps(
+        to_json(index), ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    )
     if selected == "pickle":
         with path.open("wb") as target:
-            pickle.dump({"version": VERSION, "index": index}, target, protocol=5)
+            pickle.dump({"version": VERSION, "payload": payload}, target, protocol=5)
     else:
-        data = {
-            "version": VERSION,
-            "storage": index.storage,
-            "documents": [
-                [doc_id, index.doc_lengths[doc_id], meta.path, meta.title]
-                for doc_id, meta in index.doc_meta.items()
-            ],
-            "postings": {
-                term: list(pairs(items)) for term, items in index.postings.items()
-            },
-            "texts": dict(index.texts),
-            "positions": index.__getstate__()["positions"],
-        }
-        with path.open("w", encoding="utf-8") as target:
-            json.dump(data, target, ensure_ascii=False, separators=(",", ":"))
+        path.write_text(payload, encoding="utf-8")
+
+
+def to_json(index: Index) -> dict[str, object]:
+    return {
+        "version": VERSION,
+        "storage": index.storage,
+        "documents": [
+            [doc_id, index.doc_lengths[doc_id], meta.path, meta.title]
+            for doc_id, meta in index.doc_meta.items()
+        ],
+        "postings": {
+            term: list(pairs(items)) for term, items in index.postings.items()
+        },
+        "texts": dict(index.texts),
+        "positions": index.__getstate__()["positions"],
+    }
 
 
 def _mapping(value: object) -> dict[str, object]:
@@ -200,9 +207,12 @@ def load(path: Path, format: FileFormat | None = None) -> Index:
             with path.open(encoding="utf-8") as source:
                 raw = json.load(source)
         data = _mapping(raw)
-        if data.get("version") not in (1, VERSION):
+        if data.get("version") not in (1, 2, VERSION):
             raise ValueError("Непідтримувана версія індексу")
-        index = data["index"] if selected == "pickle" else from_json(data)
+        if selected == "pickle" and data["version"] == VERSION:
+            index = from_json(_mapping(json.loads(_string(data["payload"]))))
+        else:
+            index = data["index"] if selected == "pickle" else from_json(data)
         validate(index)
         if not isinstance(index, Index):
             raise ValueError("Очікувався індекс")

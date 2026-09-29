@@ -1,0 +1,14 @@
+{"python": "3.12.5 (tags/v3.12.5:ff3bc82, Aug  6 2024, 20:45:27) [MSC v.1940 64 bit (AMD64)]", "gil_enabled": true, "expected": 200, "forced_race": 100, "with_lock": 200}
+ 11           0 RESUME                   0
+
+ 12           2 LOAD_FAST                0 (counter)
+              4 LOAD_CONST               1 ('updates')
+              6 COPY                     2
+              8 COPY                     2
+             10 BINARY_SUBSCR
+             14 LOAD_CONST               2 (1)
+             16 BINARY_OP               13 (+=)
+             20 SWAP                     3
+             22 SWAP                     2
+             24 STORE_SUBSCR
+             28 RETURN_CONST             0 (None)

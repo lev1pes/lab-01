@@ -1,0 +1,17 @@
+{
+  "python": "3.13.15 experimental free-threading build (main, Sep  1 2026, 14:19:15) [MSC v.1944 64 bit (AMD64)]",
+  "gil_enabled": false,
+  "executor": "threads",
+  "workers": 1,
+  "wall": 14.33319879998453,
+  "cpu": 6.625,
+  "parent_cpu": 6.625,
+  "child_cpu": 0.0,
+  "peak_rss_mib": 197.4140625,
+  "merge": 0.43478780006989837,
+  "chunks": 1,
+  "documents": 503,
+  "tokens": 1557525,
+  "sha256": "9604e84d8e7a5d956d6c8000da08544cceafd412700b172348102656adeec4e2",
+  "child_processes": 0
+}

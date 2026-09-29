@@ -1,6 +1,6 @@
 [project]
 name = "findex"
-version = "0.4.0"
+version = "0.5.0"
 description = "findex: інвертований індекс і ранжований пошук з командного рядка"
 readme = "README.md"
 authors = [
@@ -22,6 +22,8 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "hypothesis>=6.168.3",
+    "matplotlib>=3.11.2",
+    "psutil>=7.2.2",
     "pyright>=1.1.414",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",

@@ -23,6 +23,7 @@ def restore_logging():
     log.propagate = propagate
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("command", [[], ["index"], ["search"], ["stats"]])
 def test_help(command):
     result = runner.invoke(app, [*command, "--help"])

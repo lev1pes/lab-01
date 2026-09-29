@@ -1,0 +1,14 @@
+{"python": "3.13.15 experimental free-threading build (main, Sep  1 2026, 14:19:15) [MSC v.1944 64 bit (AMD64)]", "gil_enabled": false, "expected": 200, "forced_race": 100, "with_lock": 200}
+ 11           RESUME                   0
+
+ 12           LOAD_FAST                0 (counter)
+              LOAD_CONST               1 ('updates')
+              COPY                     2
+              COPY                     2
+              BINARY_SUBSCR
+              LOAD_CONST               2 (1)
+              BINARY_OP               13 (+=)
+              SWAP                     3
+              SWAP                     2
+              STORE_SUBSCR
+              RETURN_CONST             0 (None)
