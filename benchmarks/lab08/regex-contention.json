@@ -1,0 +1,12 @@
+[
+  {
+    "mode": "default",
+    "wall_seconds": 5.451095100026578,
+    "results": 20
+  },
+  {
+    "mode": "gil-held",
+    "wall_seconds": 0.4987773000029847,
+    "results": 20
+  }
+]

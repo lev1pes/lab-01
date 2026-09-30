@@ -17,8 +17,9 @@ def normalized_word(value: str) -> str | None:
 
 
 def matching_spans(text: str, terms: set[str]) -> Iterator[tuple[int, int, str]]:
-    # Ті самі категорії Unicode, але сканування виконує нативний regex.
-    for match in regex.finditer(r"[\p{L}\p{N}\p{M}'’ʼ‘]+", text):
+    # Короткі збіги не відпускають GIL: інакше 20 потоків постійно
+    # передають його один одному й уповільнюють CPU-пошук.
+    for match in regex.finditer(r"[\p{L}\p{N}\p{M}'’ʼ‘]+", text, concurrent=False):
         begin, end = match.span()
         while begin < end and text[begin] in "'’ʼ‘":
             begin += 1
