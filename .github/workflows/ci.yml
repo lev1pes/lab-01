@@ -68,7 +68,8 @@ jobs:
       - run: uv sync --locked --python 3.12
       - name: Модель CPU для порівнюваної бази
         id: hardware
-        run: echo "cpu=$(awk -F ': ' '/model name/{print $2; exit}' /proc/cpuinfo | sha256sum | cut -c1-12)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "cpu=$(awk -F ': ' '/model name/{print $2; exit}' /proc/cpuinfo | sha256sum | cut -c1-12)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
         with:
           path: .benchmarks
