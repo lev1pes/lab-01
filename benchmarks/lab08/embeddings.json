@@ -1,0 +1,12 @@
+{
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "model_sha256": "bbd7b466f6d58e646fdc2bd5fd67b2f5e93c0b687011bd4548c420f7bd46f0c5",
+  "shape": [
+    11273,
+    384
+  ],
+  "dtype": "float32",
+  "vectors_file_bytes": 17315456,
+  "doc_ids_file_bytes": 45220,
+  "max_norm_error": 1.1920928955078125e-07
+}

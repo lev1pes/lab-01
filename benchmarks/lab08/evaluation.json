@@ -1,0 +1,552 @@
+[
+  {
+    "query": "\"event loop\"",
+    "relevant": [
+      "library/asyncio-eventloop.txt",
+      "library/asyncio-policy.txt",
+      "library/asyncio-runner.txt",
+      "library/asyncio-task.txt",
+      "library/asyncio.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.6,
+      "paths": [
+        "library/asyncio-policy.txt",
+        "library/asyncio-eventloop.txt",
+        "library/asyncio-runner.txt",
+        "library/asyncio-llapi-index.txt",
+        "library/asyncio-platforms.txt"
+      ]
+    },
+    "semantic": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/asyncio-eventloop.txt",
+        "library/sys.monitoring.txt",
+        "library/asyncio-llapi-index.txt",
+        "library/tkinter.txt",
+        "library/asyncio-policy.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.6,
+      "paths": [
+        "library/asyncio-eventloop.txt",
+        "library/asyncio-policy.txt",
+        "library/asyncio-llapi-index.txt",
+        "library/asyncio-runner.txt",
+        "library/tkinter.txt"
+      ]
+    }
+  },
+  {
+    "query": "dataclass OR dataclasses",
+    "relevant": [
+      "library/dataclasses.txt",
+      "library/typing.txt",
+      "library/enum.txt",
+      "howto/enum.txt",
+      "library/collections.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.6,
+      "paths": [
+        "library/dataclasses.txt",
+        "library/typing.txt",
+        "howto/enum.txt",
+        "whatsnew/3.10.txt",
+        "library/queue.txt"
+      ]
+    },
+    "semantic": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/dataclasses.txt",
+        "howto/enum.txt",
+        "faq/programming.txt",
+        "tutorial/classes.txt",
+        "whatsnew/3.7.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.6,
+      "paths": [
+        "library/dataclasses.txt",
+        "howto/enum.txt",
+        "library/typing.txt",
+        "tutorial/classes.txt",
+        "whatsnew/3.7.txt"
+      ]
+    }
+  },
+  {
+    "query": "pickle OR serialization",
+    "relevant": [
+      "library/pickle.txt",
+      "library/pickletools.txt",
+      "library/copyreg.txt",
+      "library/shelve.txt",
+      "library/copy.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/pickle.txt",
+        "library/zoneinfo.txt",
+        "library/shelve.txt",
+        "library/marshal.txt",
+        "tutorial/inputoutput.txt"
+      ]
+    },
+    "semantic": {
+      "p_at_5": 0.6,
+      "paths": [
+        "library/pickle.txt",
+        "tutorial/inputoutput.txt",
+        "library/shelve.txt",
+        "whatsnew/2.3.txt",
+        "library/pickletools.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/pickle.txt",
+        "library/shelve.txt",
+        "tutorial/inputoutput.txt",
+        "library/zoneinfo.txt",
+        "library/multiprocessing.shared_memory.txt"
+      ]
+    }
+  },
+  {
+    "query": "generator OR yield",
+    "relevant": [
+      "reference/expressions.txt",
+      "tutorial/classes.txt",
+      "howto/functional.txt",
+      "reference/datamodel.txt",
+      "library/inspect.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.6,
+      "paths": [
+        "reference/expressions.txt",
+        "howto/functional.txt",
+        "reference/simple_stmts.txt",
+        "library/contextlib.txt",
+        "library/inspect.txt"
+      ]
+    },
+    "semantic": {
+      "p_at_5": 0.4,
+      "paths": [
+        "howto/functional.txt",
+        "whatsnew/3.3.txt",
+        "reference/expressions.txt",
+        "reference/simple_stmts.txt",
+        "library/typing.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.4,
+      "paths": [
+        "howto/functional.txt",
+        "reference/expressions.txt",
+        "reference/simple_stmts.txt",
+        "whatsnew/2.5.txt",
+        "whatsnew/3.3.txt"
+      ]
+    }
+  },
+  {
+    "query": "pathlib OR paths",
+    "relevant": [
+      "library/pathlib.txt",
+      "library/os.path.txt",
+      "library/os.txt",
+      "library/glob.txt",
+      "library/shutil.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/pathlib.txt",
+        "library/glob.txt",
+        "deprecations/pending-removal-in-3.15.txt",
+        "library/filesys.txt",
+        "whatsnew/3.6.txt"
+      ]
+    },
+    "semantic": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/pathlib.txt",
+        "library/os.path.txt",
+        "whatsnew/3.12.txt",
+        "whatsnew/3.8.txt",
+        "whatsnew/3.6.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/pathlib.txt",
+        "whatsnew/3.6.txt",
+        "library/os.path.txt",
+        "whatsnew/3.8.txt",
+        "whatsnew/3.12.txt"
+      ]
+    }
+  },
+  {
+    "query": "\"regular expression\" OR regex",
+    "relevant": [
+      "library/re.txt",
+      "howto/regex.txt",
+      "library/string.txt",
+      "howto/unicode.txt",
+      "reference/lexical_analysis.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/re.txt",
+        "library/fnmatch.txt",
+        "howto/regex.txt",
+        "library/compileall.txt",
+        "whatsnew/2.1.txt"
+      ]
+    },
+    "semantic": {
+      "p_at_5": 0.6,
+      "paths": [
+        "howto/regex.txt",
+        "library/re.txt",
+        "library/string.txt",
+        "reference/compound_stmts.txt",
+        "whatsnew/3.10.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.6,
+      "paths": [
+        "library/re.txt",
+        "howto/regex.txt",
+        "library/fnmatch.txt",
+        "library/string.txt",
+        "library/locale.txt"
+      ]
+    }
+  },
+  {
+    "query": "dictionary OR hashing",
+    "relevant": [
+      "library/stdtypes.txt",
+      "tutorial/datastructures.txt",
+      "reference/datamodel.txt",
+      "library/collections.txt",
+      "library/collections.abc.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.0,
+      "paths": [
+        "library/crypt.txt",
+        "library/hashlib.txt",
+        "library/hmac.txt",
+        "library/sys.txt",
+        "glossary.txt"
+      ]
+    },
+    "semantic": {
+      "p_at_5": 0.4,
+      "paths": [
+        "tutorial/modules.txt",
+        "faq/design.txt",
+        "library/stdtypes.txt",
+        "reference/datamodel.txt",
+        "faq/general.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.4,
+      "paths": [
+        "glossary.txt",
+        "reference/datamodel.txt",
+        "library/stdtypes.txt",
+        "library/hashlib.txt",
+        "whatsnew/2.5.txt"
+      ]
+    }
+  },
+  {
+    "query": "\"context manager\"",
+    "relevant": [
+      "library/contextlib.txt",
+      "reference/compound_stmts.txt",
+      "reference/datamodel.txt",
+      "library/threading.txt",
+      "library/decimal.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.2,
+      "paths": [
+        "library/contextlib.txt",
+        "library/tempfile.txt",
+        "library/test.txt",
+        "library/multiprocessing.txt",
+        "library/importlib.resources.txt"
+      ]
+    },
+    "semantic": {
+      "p_at_5": 0.4,
+      "paths": [
+        "reference/datamodel.txt",
+        "whatsnew/3.7.txt",
+        "library/contextlib.txt",
+        "whatsnew/2.6.txt",
+        "library/contextvars.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/contextlib.txt",
+        "library/importlib.resources.txt",
+        "reference/datamodel.txt",
+        "whatsnew/3.4.txt",
+        "library/multiprocessing.txt"
+      ]
+    }
+  },
+  {
+    "query": "decorator OR decorators",
+    "relevant": [
+      "library/functools.txt",
+      "library/dataclasses.txt",
+      "reference/compound_stmts.txt",
+      "howto/descriptor.txt",
+      "library/inspect.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/contextlib.txt",
+        "reference/compound_stmts.txt",
+        "library/unittest.mock.txt",
+        "library/functools.txt",
+        "whatsnew/2.4.txt"
+      ]
+    },
+    "semantic": {
+      "p_at_5": 0.2,
+      "paths": [
+        "whatsnew/2.4.txt",
+        "library/typing.txt",
+        "library/functools.txt",
+        "whatsnew/2.5.txt",
+        "whatsnew/3.11.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.4,
+      "paths": [
+        "whatsnew/2.4.txt",
+        "library/functools.txt",
+        "reference/compound_stmts.txt",
+        "library/contextlib.txt",
+        "library/typing.txt"
+      ]
+    }
+  },
+  {
+    "query": "heapq OR heap",
+    "relevant": [
+      "library/heapq.txt",
+      "library/queue.txt",
+      "library/asyncio-queue.txt",
+      "howto/sorting.txt",
+      "library/bisect.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.2,
+      "paths": [
+        "library/heapq.txt",
+        "library/datatypes.txt",
+        "whatsnew/2.3.txt",
+        "tutorial/stdlib2.txt",
+        "howto/isolating-extensions.txt"
+      ]
+    },
+    "semantic": {
+      "p_at_5": 0.4,
+      "paths": [
+        "howto/sorting.txt",
+        "library/heapq.txt",
+        "whatsnew/2.3.txt",
+        "whatsnew/2.6.txt",
+        "tutorial/stdlib2.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.4,
+      "paths": [
+        "library/heapq.txt",
+        "whatsnew/2.3.txt",
+        "howto/sorting.txt",
+        "tutorial/stdlib2.txt",
+        "howto/isolating-extensions.txt"
+      ]
+    }
+  },
+  {
+    "query": "reviving possessions",
+    "relevant": [
+      "library/pickle.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.0,
+      "paths": []
+    },
+    "semantic": {
+      "p_at_5": 0.0,
+      "paths": [
+        "extending/extending.txt",
+        "faq/programming.txt",
+        "library/os.txt",
+        "whatsnew/2.7.txt",
+        "whatsnew/3.5.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.0,
+      "paths": [
+        "extending/extending.txt",
+        "faq/programming.txt",
+        "library/os.txt",
+        "whatsnew/2.7.txt",
+        "whatsnew/3.5.txt"
+      ]
+    }
+  },
+  {
+    "query": "collaborative multitasking",
+    "relevant": [
+      "library/asyncio-task.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.0,
+      "paths": []
+    },
+    "semantic": {
+      "p_at_5": 0.2,
+      "paths": [
+        "library/multiprocessing.txt",
+        "howto/logging-cookbook.txt",
+        "library/multiprocessing.shared_memory.txt",
+        "library/asyncio-task.txt",
+        "whatsnew/2.6.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.0,
+      "paths": [
+        "library/concurrency.txt",
+        "library/tkinter.txt",
+        "whatsnew/2.3.txt",
+        "library/multiprocessing.txt",
+        "howto/logging-cookbook.txt"
+      ]
+    }
+  },
+  {
+    "query": "automated boilerplate",
+    "relevant": [
+      "library/dataclasses.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.0,
+      "paths": []
+    },
+    "semantic": {
+      "p_at_5": 0.0,
+      "paths": [
+        "tutorial/appetite.txt",
+        "tutorial/interactive.txt",
+        "whatsnew/2.0.txt",
+        "library/doctest.txt",
+        "whatsnew/2.6.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.0,
+      "paths": [
+        "whatsnew/2.1.txt",
+        "library/ast.txt",
+        "library/2to3.txt",
+        "whatsnew/3.4.txt",
+        "whatsnew/3.5.txt"
+      ]
+    }
+  },
+  {
+    "query": "hierarchical navigation",
+    "relevant": [
+      "library/pathlib.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.0,
+      "paths": []
+    },
+    "semantic": {
+      "p_at_5": 0.0,
+      "paths": [
+        "howto/logging.txt",
+        "library/tkinter.ttk.txt",
+        "library/collections.txt",
+        "howto/mro.txt",
+        "library/tkinter.tix.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.0,
+      "paths": [
+        "library/tkinter.tix.txt",
+        "howto/logging.txt",
+        "library/idle.txt",
+        "library/tkinter.ttk.txt",
+        "library/logging.txt"
+      ]
+    }
+  },
+  {
+    "query": "disposal guardians",
+    "relevant": [
+      "library/contextlib.txt"
+    ],
+    "keyword": {
+      "p_at_5": 0.0,
+      "paths": []
+    },
+    "semantic": {
+      "p_at_5": 0.0,
+      "paths": [
+        "tutorial/stdlib2.txt",
+        "library/gc.txt",
+        "reference/datamodel.txt",
+        "library/multiprocessing.txt",
+        "library/weakref.txt"
+      ]
+    },
+    "hybrid": {
+      "p_at_5": 0.0,
+      "paths": [
+        "tutorial/stdlib2.txt",
+        "library/gc.txt",
+        "reference/datamodel.txt",
+        "library/multiprocessing.txt",
+        "library/weakref.txt"
+      ]
+    }
+  }
+]

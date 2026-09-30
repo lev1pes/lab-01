@@ -51,7 +51,7 @@ select = ["E", "F", "I", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["slow: РїРµСЂРµРІС–СЂРєРё, С‰Рѕ С‚СЂРёРІР°СЋС‚СЊ РїРѕРЅР°Рґ СЃРµРєСѓРЅРґСѓ"]
+markers = ["slow: перевірки, що тривають понад секунду"]
 
 [tool.pyright]
 include = ["src/findex"]
