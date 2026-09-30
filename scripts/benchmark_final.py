@@ -2,6 +2,7 @@
 
 import json
 import statistics
+import sys
 import time
 from pathlib import Path
 from unittest.mock import patch
@@ -33,51 +34,61 @@ def measure(function, repeats=21):
 
 if __name__ == "__main__":
     index = load(Path("data/web-index.json"))
-    # Слотовий еталон відтворює об'єкти лаби 3; конвертація NumPy поза заміром.
-    legacy = Index(
-        {t: list(index[t]) for t in index},
-        dict(index.doc_lengths),
-        dict(index.doc_meta),
-        storage="slots",
-        positions=index.__getstate__()["positions"],
-        texts=dict(index.texts),
-    )
-    _ = index.numpy_postings, index.length_array
-    rows = []
-    rare = next(
-        t for t in sorted(index) if index.df(t) == 1 and t.isalpha() and len(t) > 5
-    )
-    for name, scorer in [("bm25", BM25()), ("tfidf", TfIdf())]:
-        for query in ["python", rare, "python async await"]:
-            a = rank_python(legacy, query, scorer, 10)
-            b = rank_numpy(index, query, scorer, 10)
-            assert [x[0] for x in a] == [x[0] for x in b]
-            old = measure(lambda: rank_python(legacy, query, scorer, 10))
-            new = measure(lambda: rank_numpy(index, query, scorer, 10))
-            rows.append(
-                {
-                    "scorer": name,
-                    "query": query,
-                    "matched": len(index.matched_ids(query)),
-                    "python": old,
-                    "numpy": new,
-                    "speedup": old["median_ms"] / new["median_ms"],
-                }
+    if "--evaluation-only" in sys.argv:
+        report = json.loads(
+            Path("benchmarks/lab08/speed.json").read_text(encoding="utf-8")
+        )
+    else:
+        # Слотовий еталон відтворює об'єкти лаби 3; конвертація NumPy поза заміром.
+        legacy = Index(
+            {t: list(index[t]) for t in index},
+            dict(index.doc_lengths),
+            dict(index.doc_meta),
+            storage="slots",
+            positions=index.__getstate__()["positions"],
+            texts=dict(index.texts),
+        )
+        _ = index.numpy_postings, index.length_array
+        rows = []
+        rare = next(
+            t for t in sorted(index) if index.df(t) == 1 and t.isalpha() and len(t) > 5
+        )
+        for name, scorer in [("bm25", BM25()), ("tfidf", TfIdf())]:
+            for query in ["python", rare, "python async await"]:
+                a = rank_python(legacy, query, scorer, 10)
+                b = rank_numpy(index, query, scorer, 10)
+                assert [x[0] for x in a] == [x[0] for x in b]
+                old = measure(lambda: rank_python(legacy, query, scorer, 10))
+                new = measure(lambda: rank_numpy(index, query, scorer, 10))
+                rows.append(
+                    {
+                        "scorer": name,
+                        "query": query,
+                        "matched": len(index.matched_ids(query)),
+                        "python": old,
+                        "numpy": new,
+                        "speedup": old["median_ms"] / new["median_ms"],
+                    }
+                )
+        with patch("findex.search.snippet", old_snippet):
+            old_full = measure(
+                lambda: search_reference(legacy, "python async await"), 7
             )
-    with patch("findex.search.snippet", old_snippet):
-        old_full = measure(lambda: search_reference(legacy, "python async await"), 7)
-    new_full = measure(lambda: search(index, "python async await"), 7)
-    report = {
-        "scoring": rows,
-        "full_search": {
-            "lab07": old_full,
-            "lab08": new_full,
-            "speedup": old_full["median_ms"] / new_full["median_ms"],
-        },
-    }
-    Path("benchmarks/lab08/speed.json").write_text(
-        json.dumps(report, indent=2), encoding="utf-8"
-    )
+        new_full = measure(lambda: search(index, "python async await"), 7)
+        report = {
+            "scoring": rows,
+            "full_search": {
+                "lab07": old_full,
+                "lab08": new_full,
+                "speedup": old_full["median_ms"] / new_full["median_ms"],
+            },
+        }
+        Path("benchmarks/lab08/speed.json").write_text(
+            json.dumps(report, indent=2), encoding="utf-8"
+        )
+        if "--scores-only" in sys.argv:
+            print(json.dumps(report, indent=2))
+            raise SystemExit(0)
     semantic = SemanticIndex.load(Path("data/embeddings"), index)
     encoder = MiniLM(cache_dir=Path("../models"))
     evaluation = []

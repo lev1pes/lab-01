@@ -89,7 +89,11 @@ def test_semantic_roundtrip_and_best_chunk(tiny_index, tmp_path):
         semantic=restored,
         encoder=encoder,
     )
-    assert hybrid[0].title == "a"
+    lexical = search(tiny_index, "concurrency OR python", BM25(), tiny_index.num_docs)
+    expected = rrf([lexical, ranked])
+    assert [r.doc_id for r in hybrid] == [r.doc_id for r in expected]
+    assert all(r.snippet for r in hybrid)
+    assert [r.score for r in hybrid] == pytest.approx([r.score for r in expected])
     metadata = json.loads((tmp_path / "metadata.json").read_text(encoding="utf-8"))
     metadata["corpus_hash"] = "wrong"
     (tmp_path / "metadata.json").write_text(json.dumps(metadata), encoding="utf-8")
@@ -198,3 +202,23 @@ def test_benchmark_build(benchmark, tiny_corpus):
         index.close()
 
     benchmark(run)
+
+
+def test_checkpoint_resume(tiny_index, tmp_path):
+    class CountingEncoder(FakeEncoder):
+        calls = 0
+
+        def encode(self, texts):
+            self.calls += 1
+            return super().encode(texts)
+
+    encoder = CountingEncoder()
+    first = embed(tiny_index, encoder, checkpoint_dir=tmp_path)
+    calls = encoder.calls
+    second = embed(tiny_index, encoder, checkpoint_dir=tmp_path)
+    assert encoder.calls == calls
+    np.testing.assert_allclose(first.vectors, second.vectors)
+    part = next(tmp_path.glob("*.npy"))
+    np.save(part, np.zeros((1, 2), dtype=np.float32))
+    with pytest.raises(ValueError, match="checkpoint"):
+        embed(tiny_index, encoder, checkpoint_dir=tmp_path)

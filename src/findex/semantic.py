@@ -37,7 +37,9 @@ class EmbeddingBackend(Protocol):
 class MiniLM:
     """Модель створюється один раз; threads=1 не множить потоки HTTP-воркерів."""
 
-    def __init__(self, model: str = MODEL, cache_dir: Path | None = None) -> None:
+    def __init__(
+        self, model: str = MODEL, cache_dir: Path | None = None, threads: int = 1
+    ) -> None:
         if model != MODEL:
             raise ValueError(f"Підтримувана модель: {MODEL}")
         try:
@@ -50,7 +52,7 @@ class MiniLM:
         self.backend = factory(
             model_name=model,
             cache_dir=str(cache_dir) if cache_dir else None,
-            threads=1,
+            threads=threads,
             enable_cpu_mem_arena=False,
         )
         self.lock = Lock()
@@ -179,8 +181,30 @@ class SemanticIndex:
 
 
 def embed(
-    index: Index, encoder: Encoder, progress: Callable[[int], None] | None = None
+    index: Index,
+    encoder: Encoder,
+    progress: Callable[[int], None] | None = None,
+    checkpoint_dir: Path | None = None,
 ) -> SemanticIndex:
+    def encode_batch(batch: list[str]) -> NDArray[np.float32]:
+        key = hashlib.sha256(
+            json.dumps([MODEL, batch], ensure_ascii=False).encode()
+        ).hexdigest()
+        path = checkpoint_dir / (key + ".npy") if checkpoint_dir else None
+        if path is not None and path.exists():
+            cached = np.asarray(np.load(path, allow_pickle=False), dtype=np.float32)
+            if cached.shape != (len(batch), 384):
+                raise ValueError("Пошкоджений checkpoint ембеддингів")
+            return normalize(cached)
+        result = normalize(encoder.encode(batch))
+        if path is not None:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            temporary = path.with_suffix(".tmp")
+            with temporary.open("wb") as target:
+                np.save(target, result, allow_pickle=False)
+            temporary.replace(path)
+        return result
+
     passages: list[str] = []
     ids: list[int] = []
     vectors: list[NDArray[np.float32]] = []
@@ -191,12 +215,12 @@ def embed(
             ids.append(doc)
             batch.append(passage)
             if len(batch) == 16:
-                vectors.append(normalize(encoder.encode(batch)))
+                vectors.append(encode_batch(batch))
                 if progress:
                     progress(len(batch))
                 batch = []
     if batch:
-        vectors.append(normalize(encoder.encode(batch)))
+        vectors.append(encode_batch(batch))
         if progress:
             progress(len(batch))
     matrix = (
@@ -221,7 +245,8 @@ def rrf(rankings: list[list[SearchResult]], constant: int = 60) -> list[SearchRe
             scores[result.doc_id] = scores.get(result.doc_id, 0) + 1 / (
                 constant + position
             )
-            originals.setdefault(result.doc_id, result)
+            if result.doc_id not in originals or not originals[result.doc_id].snippet:
+                originals[result.doc_id] = result
     return [
         SearchResult(doc, scores[doc], originals[doc].title, originals[doc].snippet)
         for doc in sorted(scores, key=lambda d: (-scores[d], d))

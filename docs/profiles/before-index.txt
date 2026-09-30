@@ -1,0 +1,31 @@
+Wed Sep 30 01:37:25 2026    benchmarks/lab08/before-index.prof
+
+         7307712 function calls (7296787 primitive calls) in 16.288 seconds
+
+   Ordered by: cumulative time
+   List reduced from 2554 to 83 due to restriction <'findex'>
+   List reduced from 83 to 20 due to restriction <20>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000   16.652   16.652 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\__main__.py:1(<module>)
+        1    0.009    0.009   14.995   14.995 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\cli.py:106(index_command)
+      507    0.008    0.000    6.951    0.014 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\parallel.py:57(documents)
+        4    0.002    0.001    4.097    1.024 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\parallel.py:46(build_partial)
+        4    0.536    0.134    4.095    1.024 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\index.py:39(build_state)
+  1558028    1.254    0.000    2.266    0.000 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\tokenize.py:11(tokenize)
+        1    0.010    0.010    1.669    1.669 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\store.py:94(save)
+        1    0.000    0.000    1.594    1.594 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\cli.py:1(<module>)
+        1    0.090    0.090    0.788    0.788 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\store.py:108(to_json)
+    28916    0.101    0.000    0.613    0.000 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\models.py:107(__getitem__)
+        1    0.000    0.000    0.595    0.595 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\crawler\fetch.py:1(<module>)
+   309855    0.211    0.000    0.508    0.000 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\models.py:110(<genexpr>)
+        1    0.000    0.000    0.195    0.195 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\parallel.py:36(document_paths)
+      504    0.001    0.000    0.194    0.000 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\parallel.py:42(<genexpr>)
+   619710    0.169    0.000    0.179    0.000 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\models.py:224(pairs)
+        1    0.000    0.000    0.152    0.152 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\models.py:192(close)
+        1    0.000    0.000    0.096    0.096 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\index.py:1(<module>)
+        1    0.000    0.000    0.084    0.084 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\search.py:1(<module>)
+        1    0.000    0.000    0.082    0.082 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\crawler\output.py:1(<module>)
+        1    0.000    0.000    0.062    0.062 D:\codex\2026-09-15\documents-plugin-documents-openai-primary-runtime\work\lab-01\src\findex\crawler\crawl.py:1(<module>)
+
+

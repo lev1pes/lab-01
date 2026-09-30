@@ -2,10 +2,18 @@
 
 from collections import Counter
 from collections.abc import Iterator
+from functools import lru_cache
 
 import regex
 
 from findex.tokenize import tokenize
+
+
+@lru_cache(maxsize=8192)
+def normalized_word(value: str) -> str | None:
+    """Обмежений кеш нормалізації словоформ, не кеш результатів пошуку."""
+    words = tuple(tokenize(value))
+    return words[0] if len(words) == 1 else None
 
 
 def matching_spans(text: str, terms: set[str]) -> Iterator[tuple[int, int, str]]:
@@ -16,9 +24,9 @@ def matching_spans(text: str, terms: set[str]) -> Iterator[tuple[int, int, str]]
             begin += 1
         while end > begin and text[end - 1] in "'’ʼ‘":
             end -= 1
-        words = tuple(tokenize(text[begin:end]))
-        if len(words) == 1 and words[0] in terms:
-            yield begin, end, words[0]
+        word = normalized_word(text[begin:end])
+        if word is not None and word in terms:
+            yield begin, end, word
 
 
 def snippet(text: str, terms: set[str], radius: int = 80) -> str:

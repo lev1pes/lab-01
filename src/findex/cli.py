@@ -345,14 +345,20 @@ def embed_command(
     index_path: Annotated[Path, typer.Argument()],
     out: Annotated[Path, typer.Option()] = Path("data/embeddings"),
     model: Annotated[str, typer.Option()] = MODEL,
+    threads: Annotated[int, typer.Option(min=1, max=16)] = 2,
     model_cache: Annotated[Path | None, typer.Option()] = None,
 ) -> None:
     """Порахувати нормалізовані MiniLM-вектори фрагментів і зберегти .npy."""
     with operation(trace_memory=False), open_index(index_path) as index:
-        encoder = MiniLM(model, model_cache)
+        encoder = MiniLM(model, model_cache, threads)
         with Progress(console=Console(stderr=True)) as progress:
             task = progress.add_task("Ембеддинги", total=None)
-            semantic = embed(index, encoder, lambda n: progress.advance(task, n))
+            semantic = embed(
+                index,
+                encoder,
+                lambda n: progress.advance(task, n),
+                checkpoint_dir=out / ".parts",
+            )
         semantic.save(out)
         Console().print(
             f"Збережено {len(semantic.doc_ids)} фрагментів: {out}", markup=False

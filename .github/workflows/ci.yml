@@ -11,13 +11,14 @@ jobs:
         run: |
           docker build -t findex:lab07 .
           test "$(docker inspect --format '{{.Config.User}}' findex:lab07)" = findex
-          docker run -d --name findex-test -e INDEX_PATH=/app/data/web-index.json -p 8000:8000 findex:lab07
+          docker run -d --memory=512m --name findex-test -e INDEX_PATH=/app/data/web-index.json -p 8000:8000 findex:lab07
           for attempt in $(seq 1 60); do
             if curl --fail http://127.0.0.1:8000/health; then break; fi
             sleep 2
           done
           curl --fail http://127.0.0.1:8000/health
           curl --fail 'http://127.0.0.1:8000/search?q=python'
+          curl --fail 'http://127.0.0.1:8000/search?q=automated%20boilerplate&mode=hybrid&k=5'
           docker logs findex-test
   tests:
     runs-on: ubuntu-latest
